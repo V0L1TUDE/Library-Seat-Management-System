@@ -68,7 +68,7 @@ public class SeatMapController {
     private Seat selectedSeat = null;
     private VBox selectedTile = null;
 
-    private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("hh:mm a");
+    private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("hh:mm a", java.util.Locale.US);
 
     @FXML
     public void initialize() {
@@ -265,7 +265,23 @@ public class SeatMapController {
 
     private LocalTime parseTime(String formatted) {
         if (formatted == null) return LocalTime.of(10, 0);
-        return LocalTime.parse(formatted, TIME_FMT);
+        try {
+            return LocalTime.parse(formatted.trim(), TIME_FMT);
+        } catch (Exception e) {
+            try {
+                String clean = formatted.trim().toUpperCase(java.util.Locale.US);
+                boolean isPm = clean.endsWith("PM");
+                String digits = clean.replaceAll("[^0-9:]", "");
+                String[] parts = digits.split(":");
+                int hour = Integer.parseInt(parts[0]);
+                int minute = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
+                if (isPm && hour < 12) hour += 12;
+                if (!isPm && hour == 12) hour = 0;
+                return LocalTime.of(hour, minute);
+            } catch (Exception ex) {
+                return LocalTime.of(10, 0);
+            }
+        }
     }
 
     private void showAlert(Alert.AlertType type, String title, String content) {

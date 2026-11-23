@@ -40,7 +40,7 @@ public class MyBookingsController {
     private final BookingDAO bookingDAO = new BookingDAOImpl();
     private final BookingService bookingService = new BookingService();
 
-    private static final DateTimeFormatter TS_FMT = DateTimeFormatter.ofPattern("hh:mm a");
+    private static final DateTimeFormatter TS_FMT = DateTimeFormatter.ofPattern("hh:mm a", java.util.Locale.US);
 
     @FXML
     public void initialize() {

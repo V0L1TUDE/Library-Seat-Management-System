@@ -107,7 +107,7 @@ public class Booking implements Serializable {
     }
 
     public String getFormattedTimeSlot() {
-        DateTimeFormatter timeFmt = DateTimeFormatter.ofPattern("hh:mm a");
+        DateTimeFormatter timeFmt = DateTimeFormatter.ofPattern("hh:mm a", java.util.Locale.US);
         return startTime.format(timeFmt) + " - " + endTime.format(timeFmt);
     }
 
