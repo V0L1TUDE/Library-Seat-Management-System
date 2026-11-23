@@ -32,7 +32,7 @@
 
             <VBox HBox.hgrow="ALWAYS" styleClass="stat-card">
                 <Label text="MY ACTIVE BOOKINGS" styleClass="stat-label"/>
-                <Label fx:id="lblMyActiveBookings" text="--" styleClass="stat-value" style="-fx-text-fill: -color-primary;"/>
+                <Label fx:id="lblMyActiveBookings" text="--" styleClass="stat-value" style="-fx-text-fill: -color-primary-text;"/>
                 <Label text="Upcoming study sessions" styleClass="text-muted"/>
             </VBox>
         </HBox>
@@ -40,8 +40,7 @@
         <!-- Main Dashboard Split: Next Session Hero Card + Quick Actions -->
         <HBox spacing="20">
             <!-- Next Upcoming Session Hero -->
-            <VBox HBox.hgrow="ALWAYS" prefWidth="540" spacing="14" styleClass="card"
-                  style="-fx-background-color: linear-gradient(to right, -color-surface, #F3F8F5); -fx-border-color: -color-secondary;">
+            <VBox HBox.hgrow="ALWAYS" prefWidth="540" spacing="14" styleClass="card, hero-card">
                 <HBox alignment="CENTER_LEFT" spacing="10">
                     <Label text="📌" style="-fx-font-size: 16px;"/>
                     <Label text="Your Next Upcoming Reservation" styleClass="text-heading"/>
@@ -52,7 +51,7 @@
                 <HBox spacing="24" alignment="CENTER_LEFT">
                     <VBox spacing="2">
                         <Label text="Seat Number" styleClass="text-muted"/>
-                        <Label fx:id="lblNextSeatNumber" text="No active bookings" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: -color-primary;"/>
+                        <Label fx:id="lblNextSeatNumber" text="No active bookings" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: -color-primary-text;"/>
                     </VBox>
                     <Separator orientation="VERTICAL"/>
                     <VBox spacing="2">

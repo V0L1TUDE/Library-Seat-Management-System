@@ -5,6 +5,7 @@ import com.library.seatmgmt.model.User;
 import com.library.seatmgmt.service.AuthService;
 import com.library.seatmgmt.util.LoggerUtil;
 import com.library.seatmgmt.util.SessionContext;
+import com.library.seatmgmt.util.ThemeManager;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -87,9 +88,7 @@ public class LoginController {
             Scene scene = new Scene(root, 1180, 740);
 
             // Apply active theme (Light or Dark)
-            boolean isDark = SessionContext.getInstance().getUserPreferences().isDarkModeEnabled();
-            scene.getStylesheets().clear();
-            scene.getStylesheets().add(getClass().getResource(isDark ? "/css/dark.css" : "/css/main.css").toExternalForm());
+            ThemeManager.applyTheme(scene);
 
             stage.setScene(scene);
             stage.setTitle("Smart Library Seat Management System - " + user.getRoleDisplayName());

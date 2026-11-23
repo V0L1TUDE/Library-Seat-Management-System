@@ -3,6 +3,7 @@ package com.library.seatmgmt;
 import com.library.seatmgmt.util.DBConnection;
 import com.library.seatmgmt.util.LoggerUtil;
 import com.library.seatmgmt.util.SessionContext;
+import com.library.seatmgmt.util.ThemeManager;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -35,8 +36,7 @@ public class Main extends Application {
             Scene scene = new Scene(root, 960, 620);
 
             // Apply theme (Light default, Dark if saved in serialized preferences)
-            boolean isDark = SessionContext.getInstance().getUserPreferences().isDarkModeEnabled();
-            scene.getStylesheets().add(getClass().getResource(isDark ? "/css/dark.css" : "/css/main.css").toExternalForm());
+            ThemeManager.applyTheme(scene);
 
             primaryStage.setTitle("Smart Library Seat Management System - Login");
             primaryStage.setScene(scene);

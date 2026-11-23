@@ -5,6 +5,7 @@ import com.library.seatmgmt.model.UserPreferences;
 import com.library.seatmgmt.service.AuthService;
 import com.library.seatmgmt.util.LoggerUtil;
 import com.library.seatmgmt.util.SessionContext;
+import com.library.seatmgmt.util.ThemeManager;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -110,18 +111,14 @@ public class MainController {
 
     @FXML
     public void toggleTheme() {
-        UserPreferences prefs = SessionContext.getInstance().getUserPreferences();
-        boolean newThemeIsDark = !prefs.isDarkModeEnabled();
-        prefs.setDarkModeEnabled(newThemeIsDark);
-        SessionContext.getInstance().saveUserPreferences(); // Persist to disk
-
-        // Apply new stylesheet to active Scene
         Scene scene = contentArea.getScene();
         if (scene != null) {
-            scene.getStylesheets().clear();
-            scene.getStylesheets().add(getClass().getResource(newThemeIsDark ? "/css/dark.css" : "/css/main.css").toExternalForm());
+            ThemeManager.toggleTheme(scene);
+        } else {
+            UserPreferences prefs = SessionContext.getInstance().getUserPreferences();
+            prefs.setDarkModeEnabled(!prefs.isDarkModeEnabled());
+            SessionContext.getInstance().saveUserPreferences();
         }
-
         updateThemeButtonLabel();
     }
 
@@ -134,7 +131,7 @@ public class MainController {
 
             Stage stage = (Stage) contentArea.getScene().getWindow();
             Scene scene = new Scene(root, 960, 620);
-            scene.getStylesheets().add(getClass().getResource("/css/main.css").toExternalForm());
+            ThemeManager.applyTheme(scene);
 
             stage.setScene(scene);
             stage.setTitle("Smart Library Seat Management System - Login");

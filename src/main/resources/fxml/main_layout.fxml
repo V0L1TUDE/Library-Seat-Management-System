@@ -56,8 +56,8 @@
                 <HBox spacing="14" alignment="CENTER">
                     <Label fx:id="lblCurrentDate" text="Date" style="-fx-font-size: 12px; -fx-text-fill: -color-text-muted;"/>
                     <Separator orientation="VERTICAL"/>
-                    <HBox alignment="CENTER" spacing="8" style="-fx-background-color: -color-primary-light; -fx-padding: 6 12; -fx-background-radius: 20;">
-                        <Label fx:id="lblUserFullName" text="Student User" style="-fx-font-weight: bold; -fx-font-size: 12px; -fx-text-fill: -color-primary;"/>
+                    <HBox alignment="CENTER" spacing="8" styleClass="user-badge">
+                        <Label fx:id="lblUserFullName" text="Student User" styleClass="user-badge-name"/>
                         <Label fx:id="lblUserRolePill" text="STUDENT" styleClass="badge, badge-available"/>
                     </HBox>
                 </HBox>

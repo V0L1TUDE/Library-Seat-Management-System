@@ -7,6 +7,7 @@
     -color-primary: #1E3A2F;
     -color-primary-hover: #162E25;
     -color-primary-light: #E8F0EC;
+    -color-primary-text: -color-primary;
     -color-secondary: #8A9A86;
     -color-bg-app: #F8F9F6;
     -color-surface: #FFFFFF;
@@ -130,6 +131,46 @@
     -fx-border-radius: 8;
     -fx-background-radius: 8;
     -fx-padding: 20;
+}
+
+.hero-card {
+    -fx-background-color: linear-gradient(to right, -color-surface, #F3F8F5);
+    -fx-border-color: -color-secondary;
+}
+
+/* User Badge Pill */
+.user-badge {
+    -fx-background-color: -color-primary-light;
+    -fx-padding: 6 12;
+    -fx-background-radius: 20;
+}
+
+.user-badge-name {
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-text-fill: -color-primary;
+}
+
+.user-badge-role {
+    -fx-background-color: -color-primary;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-padding: 2 6;
+    -fx-background-radius: 10;
+}
+
+/* Drawer Seat Card */
+.drawer-seat-card {
+    -fx-background-color: -color-primary-light;
+    -fx-padding: 14;
+    -fx-background-radius: 6;
+}
+
+.drawer-seat-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-primary;
 }
 
 .stat-card {
