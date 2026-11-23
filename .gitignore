@@ -1,0 +1,23 @@
+# Target build directories
+target/
+*.class
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+out/
+
+# VS Code
+.vscode/
+
+# Application Logs
+logs/
+*.log
+
+# Serialized runtime data caches
+data/*.ser
+
+# OS specific files
+.DS_Store
+Thumbs.db
