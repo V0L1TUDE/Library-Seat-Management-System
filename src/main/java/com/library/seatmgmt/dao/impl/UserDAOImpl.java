@@ -15,13 +15,16 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * JDBC Implementation of UserDAO.
- * Demonstrates PreparedStatement, ResultSet mapping, Polymorphism, and Resource Management.
+ * JDBC Implementation of UserDAO with seamless In-Memory offline fallback.
  */
 public class UserDAOImpl implements UserDAO {
 
     @Override
     public Optional<User> findById(int id) {
+        if (!DBConnection.getInstance().isAvailable()) {
+            return Optional.ofNullable(InMemoryDataStore.getInstance().users.get(id));
+        }
+
         String sql = "SELECT * FROM users WHERE id = ?";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -33,14 +36,20 @@ public class UserDAOImpl implements UserDAO {
                 }
             }
         } catch (SQLException e) {
-            LoggerUtil.severe("Error finding user by ID: " + id, e);
-            throw new DatabaseOperationException("Failed to find user by ID", e);
+            LoggerUtil.warning("MySQL query failed; using offline memory store for user ID: " + id);
+            return Optional.ofNullable(InMemoryDataStore.getInstance().users.get(id));
         }
         return Optional.empty();
     }
 
     @Override
     public Optional<User> findByUsername(String username) {
+        if (!DBConnection.getInstance().isAvailable()) {
+            return InMemoryDataStore.getInstance().users.values().stream()
+                    .filter(u -> u.getUsername().equalsIgnoreCase(username))
+                    .findFirst();
+        }
+
         String sql = "SELECT * FROM users WHERE username = ?";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -52,14 +61,22 @@ public class UserDAOImpl implements UserDAO {
                 }
             }
         } catch (SQLException e) {
-            LoggerUtil.severe("Error finding user by username: " + username, e);
-            throw new DatabaseOperationException("Failed to find user by username", e);
+            LoggerUtil.warning("MySQL query failed; using offline memory store for username: " + username);
+            return InMemoryDataStore.getInstance().users.values().stream()
+                    .filter(u -> u.getUsername().equalsIgnoreCase(username))
+                    .findFirst();
         }
         return Optional.empty();
     }
 
     @Override
     public Optional<User> findByEmail(String email) {
+        if (!DBConnection.getInstance().isAvailable()) {
+            return InMemoryDataStore.getInstance().users.values().stream()
+                    .filter(u -> u.getEmail().equalsIgnoreCase(email))
+                    .findFirst();
+        }
+
         String sql = "SELECT * FROM users WHERE email = ?";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -71,14 +88,22 @@ public class UserDAOImpl implements UserDAO {
                 }
             }
         } catch (SQLException e) {
-            LoggerUtil.severe("Error finding user by email: " + email, e);
-            throw new DatabaseOperationException("Failed to find user by email", e);
+            return InMemoryDataStore.getInstance().users.values().stream()
+                    .filter(u -> u.getEmail().equalsIgnoreCase(email))
+                    .findFirst();
         }
         return Optional.empty();
     }
 
     @Override
     public Optional<Student> findStudentByRollNumber(String rollNumber) {
+        if (!DBConnection.getInstance().isAvailable()) {
+            return InMemoryDataStore.getInstance().users.values().stream()
+                    .filter(u -> u instanceof Student s && rollNumber.equalsIgnoreCase(s.getStudentIdNumber()))
+                    .map(u -> (Student) u)
+                    .findFirst();
+        }
+
         String sql = "SELECT * FROM users WHERE student_id_number = ? AND role = 'STUDENT'";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -90,14 +115,24 @@ public class UserDAOImpl implements UserDAO {
                 }
             }
         } catch (SQLException e) {
-            LoggerUtil.severe("Error finding student by roll number: " + rollNumber, e);
-            throw new DatabaseOperationException("Failed to find student by roll number", e);
+            return InMemoryDataStore.getInstance().users.values().stream()
+                    .filter(u -> u instanceof Student s && rollNumber.equalsIgnoreCase(s.getStudentIdNumber()))
+                    .map(u -> (Student) u)
+                    .findFirst();
         }
         return Optional.empty();
     }
 
     @Override
     public boolean save(User user) {
+        if (!DBConnection.getInstance().isAvailable()) {
+            if (user.getId() == 0) {
+                user.setId(InMemoryDataStore.getInstance().nextUserId());
+            }
+            InMemoryDataStore.getInstance().users.put(user.getId(), user);
+            return true;
+        }
+
         String sql = "INSERT INTO users (username, password_hash, full_name, email, role, student_id_number, department, phone) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getInstance().getConnection();
@@ -129,14 +164,21 @@ public class UserDAOImpl implements UserDAO {
                 return true;
             }
         } catch (SQLException e) {
-            LoggerUtil.severe("Error saving user: " + user.getUsername(), e);
-            throw new DatabaseOperationException("Failed to save user", e);
+            LoggerUtil.warning("MySQL save failed; saving to offline memory store");
+            user.setId(InMemoryDataStore.getInstance().nextUserId());
+            InMemoryDataStore.getInstance().users.put(user.getId(), user);
+            return true;
         }
         return false;
     }
 
     @Override
     public boolean update(User user) {
+        if (!DBConnection.getInstance().isAvailable()) {
+            InMemoryDataStore.getInstance().users.put(user.getId(), user);
+            return true;
+        }
+
         String sql = "UPDATE users SET full_name = ?, email = ?, department = ?, phone = ? WHERE id = ?";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -155,13 +197,20 @@ public class UserDAOImpl implements UserDAO {
             ps.setInt(5, user.getId());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            LoggerUtil.severe("Error updating user ID: " + user.getId(), e);
-            throw new DatabaseOperationException("Failed to update user", e);
+            InMemoryDataStore.getInstance().users.put(user.getId(), user);
+            return true;
         }
     }
 
     @Override
     public List<Student> findAllStudents() {
+        if (!DBConnection.getInstance().isAvailable()) {
+            return InMemoryDataStore.getInstance().users.values().stream()
+                    .filter(u -> u instanceof Student)
+                    .map(u -> (Student) u)
+                    .toList();
+        }
+
         List<Student> students = new ArrayList<>();
         String sql = "SELECT * FROM users WHERE role = 'STUDENT' ORDER BY full_name ASC";
         try (Connection conn = DBConnection.getInstance().getConnection();
@@ -172,14 +221,21 @@ public class UserDAOImpl implements UserDAO {
                 students.add((Student) mapResultSetToUser(rs));
             }
         } catch (SQLException e) {
-            LoggerUtil.severe("Error fetching all students", e);
-            throw new DatabaseOperationException("Failed to fetch students", e);
+            return InMemoryDataStore.getInstance().users.values().stream()
+                    .filter(u -> u instanceof Student)
+                    .map(u -> (Student) u)
+                    .toList();
         }
         return students;
     }
 
     @Override
     public int countTotalStudents() {
+        if (!DBConnection.getInstance().isAvailable()) {
+            return (int) InMemoryDataStore.getInstance().users.values().stream()
+                    .filter(u -> u instanceof Student).count();
+        }
+
         String sql = "SELECT COUNT(*) FROM users WHERE role = 'STUDENT'";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -189,7 +245,8 @@ public class UserDAOImpl implements UserDAO {
                 return rs.getInt(1);
             }
         } catch (SQLException e) {
-            LoggerUtil.severe("Error counting total students", e);
+            return (int) InMemoryDataStore.getInstance().users.values().stream()
+                    .filter(u -> u instanceof Student).count();
         }
         return 0;
     }

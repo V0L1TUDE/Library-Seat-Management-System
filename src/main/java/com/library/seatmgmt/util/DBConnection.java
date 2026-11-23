@@ -23,6 +23,7 @@ public final class DBConnection {
     private String password;
     private String driver;
     private int timeout;
+    private Boolean dbAvailable = null;
 
     private DBConnection() {
         loadProperties();
@@ -32,7 +33,13 @@ public final class DBConnection {
         Properties props = new Properties();
         try (InputStream in = getClass().getResourceAsStream(PROPERTIES_FILE)) {
             if (in == null) {
-                throw new DatabaseOperationException("Could not find configuration file: " + PROPERTIES_FILE);
+                LoggerUtil.warning("Could not find configuration file: " + PROPERTIES_FILE + ". Using defaults.");
+                this.url = "jdbc:mysql://localhost:3306/library_seat_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
+                this.username = "root";
+                this.password = "root";
+                this.driver = "com.mysql.cj.jdbc.Driver";
+                this.timeout = 3;
+                return;
             }
             props.load(in);
 
@@ -40,14 +47,12 @@ public final class DBConnection {
             this.username = props.getProperty("db.username", "root");
             this.password = props.getProperty("db.password", "root");
             this.driver = props.getProperty("db.driver", "com.mysql.cj.jdbc.Driver");
-            this.timeout = Integer.parseInt(props.getProperty("db.timeout", "5"));
+            this.timeout = Integer.parseInt(props.getProperty("db.timeout", "3"));
 
             // Register driver class
             Class.forName(driver);
-            LoggerUtil.info("Database driver loaded successfully: " + driver);
         } catch (IOException | ClassNotFoundException e) {
-            LoggerUtil.severe("Failed to initialize database configuration", e);
-            throw new DatabaseOperationException("Failed to initialize database driver or properties", e);
+            LoggerUtil.warning("Failed to initialize database driver: " + e.getMessage());
         }
     }
 
@@ -71,11 +76,27 @@ public final class DBConnection {
      */
     public boolean testConnection() {
         try (Connection conn = getConnection()) {
-            return conn != null && !conn.isClosed();
+            boolean ok = conn != null && !conn.isClosed();
+            this.dbAvailable = ok;
+            return ok;
         } catch (SQLException e) {
-            LoggerUtil.warning("Database connectivity test failed: " + e.getMessage());
+            this.dbAvailable = false;
             return false;
         }
+    }
+
+    /**
+     * Returns true if MySQL is connected; otherwise false to allow seamless offline fallback.
+     */
+    public boolean isAvailable() {
+        if (dbAvailable == null) {
+            testConnection();
+        }
+        return Boolean.TRUE.equals(dbAvailable);
+    }
+
+    public void invalidateAvailability() {
+        this.dbAvailable = null;
     }
 
     public String getUrl() {

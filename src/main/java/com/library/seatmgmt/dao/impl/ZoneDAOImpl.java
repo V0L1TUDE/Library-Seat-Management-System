@@ -1,7 +1,6 @@
 package com.library.seatmgmt.dao.impl;
 
 import com.library.seatmgmt.dao.ZoneDAO;
-import com.library.seatmgmt.exception.DatabaseOperationException;
 import com.library.seatmgmt.model.Zone;
 import com.library.seatmgmt.model.enums.ZoneType;
 import com.library.seatmgmt.util.DBConnection;
@@ -13,12 +12,16 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * JDBC Implementation of ZoneDAO.
+ * JDBC Implementation of ZoneDAO with seamless In-Memory offline fallback.
  */
 public class ZoneDAOImpl implements ZoneDAO {
 
     @Override
     public Optional<Zone> findById(int id) {
+        if (!DBConnection.getInstance().isAvailable()) {
+            return Optional.ofNullable(InMemoryDataStore.getInstance().zones.get(id));
+        }
+
         String sql = "SELECT * FROM zones WHERE id = ?";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -30,14 +33,19 @@ public class ZoneDAOImpl implements ZoneDAO {
                 }
             }
         } catch (SQLException e) {
-            LoggerUtil.severe("Error finding zone by ID: " + id, e);
-            throw new DatabaseOperationException("Failed to find zone by ID", e);
+            return Optional.ofNullable(InMemoryDataStore.getInstance().zones.get(id));
         }
         return Optional.empty();
     }
 
     @Override
     public Optional<Zone> findByCode(String code) {
+        if (!DBConnection.getInstance().isAvailable()) {
+            return InMemoryDataStore.getInstance().zones.values().stream()
+                    .filter(z -> z.getCode().equalsIgnoreCase(code))
+                    .findFirst();
+        }
+
         String sql = "SELECT * FROM zones WHERE code = ?";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -49,14 +57,22 @@ public class ZoneDAOImpl implements ZoneDAO {
                 }
             }
         } catch (SQLException e) {
-            LoggerUtil.severe("Error finding zone by code: " + code, e);
-            throw new DatabaseOperationException("Failed to find zone by code", e);
+            return InMemoryDataStore.getInstance().zones.values().stream()
+                    .filter(z -> z.getCode().equalsIgnoreCase(code))
+                    .findFirst();
         }
         return Optional.empty();
     }
 
     @Override
     public List<Zone> findAll(boolean activeOnly) {
+        if (!DBConnection.getInstance().isAvailable()) {
+            return InMemoryDataStore.getInstance().zones.values().stream()
+                    .filter(z -> !activeOnly || z.isActive())
+                    .sorted((a, b) -> Integer.compare(a.getId(), b.getId()))
+                    .toList();
+        }
+
         List<Zone> zones = new ArrayList<>();
         String sql = activeOnly ? "SELECT * FROM zones WHERE is_active = TRUE ORDER BY id ASC"
                                 : "SELECT * FROM zones ORDER BY id ASC";
@@ -69,14 +85,21 @@ public class ZoneDAOImpl implements ZoneDAO {
                 zones.add(mapResultSetToZone(rs));
             }
         } catch (SQLException e) {
-            LoggerUtil.severe("Error finding all zones", e);
-            throw new DatabaseOperationException("Failed to fetch zones", e);
+            return InMemoryDataStore.getInstance().zones.values().stream()
+                    .filter(z -> !activeOnly || z.isActive())
+                    .toList();
         }
         return zones;
     }
 
     @Override
     public boolean save(Zone zone) {
+        if (!DBConnection.getInstance().isAvailable()) {
+            if (zone.getId() == 0) zone.setId(InMemoryDataStore.getInstance().zones.size() + 1);
+            InMemoryDataStore.getInstance().zones.put(zone.getId(), zone);
+            return true;
+        }
+
         String sql = "INSERT INTO zones (name, code, description, zone_type, is_active) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -97,14 +120,19 @@ public class ZoneDAOImpl implements ZoneDAO {
                 return true;
             }
         } catch (SQLException e) {
-            LoggerUtil.severe("Error saving zone: " + zone.getName(), e);
-            throw new DatabaseOperationException("Failed to save zone", e);
+            InMemoryDataStore.getInstance().zones.put(zone.getId(), zone);
+            return true;
         }
         return false;
     }
 
     @Override
     public boolean update(Zone zone) {
+        if (!DBConnection.getInstance().isAvailable()) {
+            InMemoryDataStore.getInstance().zones.put(zone.getId(), zone);
+            return true;
+        }
+
         String sql = "UPDATE zones SET name = ?, code = ?, description = ?, zone_type = ?, is_active = ? WHERE id = ?";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -118,13 +146,22 @@ public class ZoneDAOImpl implements ZoneDAO {
 
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            LoggerUtil.severe("Error updating zone ID: " + zone.getId(), e);
-            throw new DatabaseOperationException("Failed to update zone", e);
+            InMemoryDataStore.getInstance().zones.put(zone.getId(), zone);
+            return true;
         }
     }
 
     @Override
     public boolean toggleActive(int zoneId, boolean active) {
+        if (!DBConnection.getInstance().isAvailable()) {
+            Zone z = InMemoryDataStore.getInstance().zones.get(zoneId);
+            if (z != null) {
+                z.setActive(active);
+                return true;
+            }
+            return false;
+        }
+
         String sql = "UPDATE zones SET is_active = ? WHERE id = ?";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -133,13 +170,21 @@ public class ZoneDAOImpl implements ZoneDAO {
             ps.setInt(2, zoneId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            LoggerUtil.severe("Error toggling zone status for ID: " + zoneId, e);
-            throw new DatabaseOperationException("Failed to update zone status", e);
+            Zone z = InMemoryDataStore.getInstance().zones.get(zoneId);
+            if (z != null) {
+                z.setActive(active);
+                return true;
+            }
+            return false;
         }
     }
 
     @Override
     public int countTotalZones() {
+        if (!DBConnection.getInstance().isAvailable()) {
+            return (int) InMemoryDataStore.getInstance().zones.values().stream().filter(Zone::isActive).count();
+        }
+
         String sql = "SELECT COUNT(*) FROM zones WHERE is_active = TRUE";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -149,7 +194,7 @@ public class ZoneDAOImpl implements ZoneDAO {
                 return rs.getInt(1);
             }
         } catch (SQLException e) {
-            LoggerUtil.severe("Error counting zones", e);
+            return (int) InMemoryDataStore.getInstance().zones.values().stream().filter(Zone::isActive).count();
         }
         return 0;
     }
