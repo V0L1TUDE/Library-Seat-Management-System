@@ -1,0 +1,377 @@
+/* ============================================================
+   SMART LIBRARY SEAT MANAGEMENT SYSTEM - DESIGN SYSTEM (LIGHT)
+   Theme: Academic Sanctuary (Forest Green, Sage, Warm Neutral)
+   ============================================================ */
+
+.root {
+    -color-primary: #1E3A2F;
+    -color-primary-hover: #162E25;
+    -color-primary-light: #E8F0EC;
+    -color-secondary: #8A9A86;
+    -color-bg-app: #F8F9F6;
+    -color-surface: #FFFFFF;
+    -color-border: #E2E8E4;
+    -color-text-main: #1C2520;
+    -color-text-muted: #6B7A72;
+
+    /* Status Tokens */
+    -color-available-bg: #EBF7EE;
+    -color-available-border: #2D7A4C;
+    -color-available-text: #1B5233;
+
+    -color-reserved-bg: #FEF6E9;
+    -color-reserved-border: #D9822B;
+    -color-reserved-text: #935316;
+
+    -color-occupied-bg: #FDEEE9;
+    -color-occupied-border: #C94A4A;
+    -color-occupied-text: #8A2A2A;
+
+    -color-maintenance-bg: #F0F2F1;
+    -color-maintenance-border: #9BA5A0;
+    -color-maintenance-text: #626A66;
+
+    -color-selected-bg: #E9F2FE;
+    -color-selected-border: #2563EB;
+    -color-selected-text: #1E40AF;
+
+    -fx-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -fx-font-size: 13px;
+    -fx-background-color: -color-bg-app;
+}
+
+/* ----------------- TYPOGRAPHY ----------------- */
+.text-display {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-text-main;
+}
+
+.text-heading {
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-text-main;
+}
+
+.text-subheading {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-text-main;
+}
+
+.text-body {
+    -fx-font-size: 13px;
+    -fx-text-fill: -color-text-main;
+}
+
+.text-muted {
+    -fx-font-size: 12px;
+    -fx-text-fill: -color-text-muted;
+}
+
+/* ----------------- SHELL & PANELS ----------------- */
+.sidebar {
+    -fx-background-color: #142820;
+    -fx-padding: 24 16;
+    -fx-spacing: 8;
+}
+
+.sidebar-brand-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFFFFF;
+}
+
+.sidebar-brand-subtitle {
+    -fx-font-size: 11px;
+    -fx-text-fill: #A3B8AD;
+}
+
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #C2D1C9;
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+    -fx-padding: 10 14;
+    -fx-alignment: CENTER_LEFT;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+
+.nav-button:hover {
+    -fx-background-color: #1E3A2F;
+    -fx-text-fill: #FFFFFF;
+}
+
+.nav-button.active {
+    -fx-background-color: #26483B;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-weight: bold;
+}
+
+.topbar {
+    -fx-background-color: -color-surface;
+    -fx-border-color: -color-border;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 12 24;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.content-pane {
+    -fx-background-color: -color-bg-app;
+    -fx-padding: 24;
+}
+
+/* ----------------- CARDS ----------------- */
+.card {
+    -fx-background-color: -color-surface;
+    -fx-border-color: -color-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 20;
+}
+
+.stat-card {
+    -fx-background-color: -color-surface;
+    -fx-border-color: -color-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 16 20;
+    -fx-spacing: 4;
+}
+
+.stat-value {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-text-main;
+}
+
+.stat-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+    -fx-text-fill: -color-text-muted;
+}
+
+/* ----------------- BUTTONS ----------------- */
+.btn-primary {
+    -fx-background-color: -color-primary;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 9 18;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+
+.btn-primary:hover {
+    -fx-background-color: -color-primary-hover;
+}
+
+.btn-secondary {
+    -fx-background-color: -color-surface;
+    -fx-text-fill: -color-text-main;
+    -fx-border-color: -color-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+    -fx-padding: 8 16;
+    -fx-cursor: hand;
+}
+
+.btn-secondary:hover {
+    -fx-background-color: -color-primary-light;
+}
+
+.btn-danger {
+    -fx-background-color: #FEECEB;
+    -fx-text-fill: #C94A4A;
+    -fx-border-color: #F8C6C4;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 6 12;
+    -fx-cursor: hand;
+}
+
+.btn-danger:hover {
+    -fx-background-color: #C94A4A;
+    -fx-text-fill: #FFFFFF;
+}
+
+.btn-success {
+    -fx-background-color: #EBF7EE;
+    -fx-text-fill: #2D7A4C;
+    -fx-border-color: #BBE5C7;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 6 12;
+    -fx-cursor: hand;
+}
+
+.btn-success:hover {
+    -fx-background-color: #2D7A4C;
+    -fx-text-fill: #FFFFFF;
+}
+
+/* ----------------- INPUT CONTROLS ----------------- */
+.text-field, .password-field, .combo-box, .date-picker {
+    -fx-background-color: -color-surface;
+    -fx-border-color: -color-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 8 12;
+    -fx-font-size: 13px;
+    -fx-text-fill: -color-text-main;
+}
+
+.text-field:focused, .password-field:focused, .combo-box:focused, .date-picker:focused {
+    -fx-border-color: -color-primary;
+    -fx-background-color: #FFFFFF;
+}
+
+/* ----------------- SEAT TILES ----------------- */
+.seat-tile {
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-width: 1.5;
+    -fx-padding: 12 10;
+    -fx-alignment: CENTER;
+    -fx-pref-width: 90;
+    -fx-pref-height: 80;
+    -fx-cursor: hand;
+}
+
+.seat-tile-number {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.seat-tile-icons {
+    -fx-font-size: 10px;
+}
+
+/* Seat States */
+.seat-available {
+    -fx-background-color: -color-available-bg;
+    -fx-border-color: -color-available-border;
+}
+.seat-available .seat-tile-number {
+    -fx-text-fill: -color-available-text;
+}
+
+.seat-reserved {
+    -fx-background-color: -color-reserved-bg;
+    -fx-border-color: -color-reserved-border;
+}
+.seat-reserved .seat-tile-number {
+    -fx-text-fill: -color-reserved-text;
+}
+
+.seat-occupied {
+    -fx-background-color: -color-occupied-bg;
+    -fx-border-color: -color-occupied-border;
+}
+.seat-occupied .seat-tile-number {
+    -fx-text-fill: -color-occupied-text;
+}
+
+.seat-maintenance {
+    -fx-background-color: -color-maintenance-bg;
+    -fx-border-color: -color-maintenance-border;
+    -fx-opacity: 0.65;
+    -fx-cursor: default;
+}
+.seat-maintenance .seat-tile-number {
+    -fx-text-fill: -color-maintenance-text;
+}
+
+.seat-selected {
+    -fx-background-color: -color-selected-bg;
+    -fx-border-color: -color-selected-border;
+    -fx-border-width: 2.5;
+}
+.seat-selected .seat-tile-number {
+    -fx-text-fill: -color-selected-text;
+}
+
+/* ----------------- STATUS BADGES ----------------- */
+.badge {
+    -fx-background-radius: 12;
+    -fx-padding: 3 9;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.badge-available {
+    -fx-background-color: -color-available-bg;
+    -fx-text-fill: -color-available-text;
+}
+
+.badge-reserved {
+    -fx-background-color: -color-reserved-bg;
+    -fx-text-fill: -color-reserved-text;
+}
+
+.badge-occupied {
+    -fx-background-color: -color-occupied-bg;
+    -fx-text-fill: -color-occupied-text;
+}
+
+.badge-completed {
+    -fx-background-color: #F1F3F5;
+    -fx-text-fill: #495057;
+}
+
+.badge-cancelled, .badge-no-show {
+    -fx-background-color: #FEECEB;
+    -fx-text-fill: #C94A4A;
+}
+
+/* ----------------- TABLE VIEW ----------------- */
+.table-view {
+    -fx-background-color: -color-surface;
+    -fx-border-color: -color-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #F2F5F3;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-padding: 10 12;
+}
+
+.table-view .column-header .label {
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-text-main;
+    -fx-font-size: 12px;
+}
+
+.table-row-cell {
+    -fx-background-color: -color-surface;
+    -fx-border-color: transparent transparent -color-border transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 4 0;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #F8FAF9;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: -color-primary-light;
+}

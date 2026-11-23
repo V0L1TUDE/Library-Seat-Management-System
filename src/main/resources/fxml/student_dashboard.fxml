@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.library.seatmgmt.controller.StudentDashboardController"
+            fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;">
+
+    <VBox spacing="24" style="-fx-padding: 10;">
+
+        <!-- Metric KPI Cards Row -->
+        <HBox spacing="16">
+            <VBox HBox.hgrow="ALWAYS" styleClass="stat-card">
+                <Label text="TOTAL SEATS" styleClass="stat-label"/>
+                <Label fx:id="lblTotalSeats" text="--" styleClass="stat-value"/>
+                <Label text="Across all 4 library zones" styleClass="text-muted"/>
+            </VBox>
+
+            <VBox HBox.hgrow="ALWAYS" styleClass="stat-card">
+                <Label text="AVAILABLE NOW" styleClass="stat-label"/>
+                <Label fx:id="lblAvailableSeats" text="--" styleClass="stat-value" style="-fx-text-fill: -color-available-border;"/>
+                <Label text="Ready for immediate reservation" styleClass="text-muted"/>
+            </VBox>
+
+            <VBox HBox.hgrow="ALWAYS" styleClass="stat-card">
+                <Label text="CURRENTLY OCCUPIED" styleClass="stat-label"/>
+                <Label fx:id="lblOccupiedSeats" text="--" styleClass="stat-value" style="-fx-text-fill: -color-occupied-border;"/>
+                <Label text="Students checked in" styleClass="text-muted"/>
+            </VBox>
+
+            <VBox HBox.hgrow="ALWAYS" styleClass="stat-card">
+                <Label text="MY ACTIVE BOOKINGS" styleClass="stat-label"/>
+                <Label fx:id="lblMyActiveBookings" text="--" styleClass="stat-value" style="-fx-text-fill: -color-primary;"/>
+                <Label text="Upcoming study sessions" styleClass="text-muted"/>
+            </VBox>
+        </HBox>
+
+        <!-- Main Dashboard Split: Next Session Hero Card + Quick Actions -->
+        <HBox spacing="20">
+            <!-- Next Upcoming Session Hero -->
+            <VBox HBox.hgrow="ALWAYS" prefWidth="540" spacing="14" styleClass="card"
+                  style="-fx-background-color: linear-gradient(to right, -color-surface, #F3F8F5); -fx-border-color: -color-secondary;">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="📌" style="-fx-font-size: 16px;"/>
+                    <Label text="Your Next Upcoming Reservation" styleClass="text-heading"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="lblNextBookingBadge" text="RESERVED" styleClass="badge, badge-reserved"/>
+                </HBox>
+
+                <HBox spacing="24" alignment="CENTER_LEFT">
+                    <VBox spacing="2">
+                        <Label text="Seat Number" styleClass="text-muted"/>
+                        <Label fx:id="lblNextSeatNumber" text="No active bookings" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: -color-primary;"/>
+                    </VBox>
+                    <Separator orientation="VERTICAL"/>
+                    <VBox spacing="2">
+                        <Label text="Library Zone" styleClass="text-muted"/>
+                        <Label fx:id="lblNextZoneName" text="--" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+                    </VBox>
+                    <Separator orientation="VERTICAL"/>
+                    <VBox spacing="2">
+                        <Label text="Scheduled Time" styleClass="text-muted"/>
+                        <Label fx:id="lblNextTimeSlot" text="--" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+                    </VBox>
+                </HBox>
+
+                <HBox spacing="12" alignment="CENTER_RIGHT">
+                    <Button fx:id="btnQuickCheckIn" text="✅ Check In Now" onAction="#handleQuickCheckIn" styleClass="btn-success" disable="true"/>
+                    <Button text="View All Bookings" onAction="#handleViewAllBookings" styleClass="btn-secondary"/>
+                </HBox>
+            </VBox>
+
+            <!-- Quick Action Card -->
+            <VBox prefWidth="320" spacing="14" styleClass="card">
+                <Label text="Need a Study Spot?" styleClass="text-heading"/>
+                <Label text="Find quiet reading pods, computer terminals, or discussion tables in real-time."
+                       wrapText="true" styleClass="text-muted" style="-fx-line-spacing: 3;"/>
+                <Region VBox.vgrow="ALWAYS"/>
+                <Button text="🪑 Reserve a Seat Now" onAction="#handleQuickBookSeat" maxWidth="Infinity" styleClass="btn-primary" style="-fx-padding: 12;"/>
+            </VBox>
+        </HBox>
+
+        <!-- Recent Booking History Table Section -->
+        <VBox spacing="12" styleClass="card">
+            <HBox alignment="CENTER_LEFT">
+                <VBox spacing="2">
+                    <Label text="Recent Bookings" styleClass="text-heading"/>
+                    <Label text="Your recent library reservation history" styleClass="text-muted"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Refresh" onAction="#loadDashboardData" styleClass="btn-secondary" style="-fx-font-size: 11px;"/>
+            </HBox>
+
+            <TableView fx:id="tblRecentBookings" prefHeight="220" styleClass="table-view">
+                <columns>
+                    <TableColumn fx:id="colId" text="ID" prefWidth="60"/>
+                    <TableColumn fx:id="colSeat" text="Seat" prefWidth="90"/>
+                    <TableColumn fx:id="colZone" text="Zone" prefWidth="170"/>
+                    <TableColumn fx:id="colDate" text="Date" prefWidth="120"/>
+                    <TableColumn fx:id="colTime" text="Time Slot" prefWidth="160"/>
+                    <TableColumn fx:id="colStatus" text="Status" prefWidth="120"/>
+                </columns>
+                <placeholder>
+                    <Label text="No booking records found." styleClass="text-muted"/>
+                </placeholder>
+            </TableView>
+        </VBox>
+
+    </VBox>
+</ScrollPane>

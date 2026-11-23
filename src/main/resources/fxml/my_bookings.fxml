@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.library.seatmgmt.controller.MyBookingsController"
+      spacing="16" style="-fx-padding: 6;">
+
+    <!-- Action Toolbar Card -->
+    <HBox spacing="14" alignment="CENTER_LEFT" styleClass="card" style="-fx-padding: 14 20;">
+        <Label text="Filter by Status:" style="-fx-font-weight: bold; -fx-font-size: 12px;"/>
+        <ComboBox fx:id="cmbStatusFilter" prefWidth="160" styleClass="combo-box"/>
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <Button fx:id="btnCheckIn" text="✅ Check In" onAction="#handleCheckIn" styleClass="btn-success" disable="true"/>
+        <Button fx:id="btnCheckOut" text="📤 Check Out" onAction="#handleCheckOut" styleClass="btn-secondary" disable="true"/>
+        <Button fx:id="btnCancel" text="❌ Cancel Booking" onAction="#handleCancel" styleClass="btn-danger" disable="true"/>
+        <Button text="🔄 Refresh" onAction="#loadBookings" styleClass="btn-secondary"/>
+    </HBox>
+
+    <!-- Table of Bookings -->
+    <VBox VBox.vgrow="ALWAYS" styleClass="card" spacing="10">
+        <TableView fx:id="tblBookings" VBox.vgrow="ALWAYS" styleClass="table-view">
+            <columns>
+                <TableColumn fx:id="colId" text="ID" prefWidth="70"/>
+                <TableColumn fx:id="colSeat" text="Seat Code" prefWidth="100"/>
+                <TableColumn fx:id="colZone" text="Library Zone" prefWidth="190"/>
+                <TableColumn fx:id="colDate" text="Date" prefWidth="120"/>
+                <TableColumn fx:id="colTime" text="Time Slot" prefWidth="180"/>
+                <TableColumn fx:id="colStatus" text="Status" prefWidth="130"/>
+                <TableColumn fx:id="colCheckIn" text="Checked In At" prefWidth="150"/>
+            </columns>
+            <placeholder>
+                <Label text="You have no bookings recorded." styleClass="text-muted"/>
+            </placeholder>
+        </TableView>
+    </VBox>
+
+</VBox>

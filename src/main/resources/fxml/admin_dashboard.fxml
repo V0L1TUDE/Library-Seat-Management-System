@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.library.seatmgmt.controller.AdminDashboardController"
+            fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;">
+
+    <VBox spacing="20" style="-fx-padding: 6;">
+
+        <!-- Admin Action Bar -->
+        <HBox spacing="14" alignment="CENTER_LEFT" styleClass="card" style="-fx-padding: 14 20;">
+            <VBox>
+                <Label text="System Operations" style="-fx-font-weight: bold; -fx-font-size: 13px;"/>
+                <Label text="Run automated background maintenance and no-show scans" styleClass="text-muted"/>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="⚡ Trigger No-Show Auto Release" onAction="#handleTriggerNoShowScan" styleClass="btn-primary"/>
+            <Button text="🔄 Refresh All Metrics" onAction="#loadAdminData" styleClass="btn-secondary"/>
+        </HBox>
+
+        <!-- KPI Metrics + Pie Chart Split -->
+        <HBox spacing="16">
+            <!-- Left: Stat Cards -->
+            <VBox prefWidth="380" spacing="12">
+                <HBox spacing="12">
+                    <VBox HBox.hgrow="ALWAYS" styleClass="stat-card">
+                        <Label text="TOTAL SEATS" styleClass="stat-label"/>
+                        <Label fx:id="lblAdminTotalSeats" text="--" styleClass="stat-value"/>
+                    </VBox>
+                    <VBox HBox.hgrow="ALWAYS" styleClass="stat-card">
+                        <Label text="OCCUPIED NOW" styleClass="stat-label"/>
+                        <Label fx:id="lblAdminOccupied" text="--" styleClass="stat-value" style="-fx-text-fill: -color-occupied-border;"/>
+                    </VBox>
+                </HBox>
+                <HBox spacing="12">
+                    <VBox HBox.hgrow="ALWAYS" styleClass="stat-card">
+                        <Label text="RESERVED NOW" styleClass="stat-label"/>
+                        <Label fx:id="lblAdminReserved" text="--" styleClass="stat-value" style="-fx-text-fill: -color-reserved-border;"/>
+                    </VBox>
+                    <VBox HBox.hgrow="ALWAYS" styleClass="stat-card">
+                        <Label text="ACTIVE ZONES" styleClass="stat-label"/>
+                        <Label text="4" styleClass="stat-value" style="-fx-text-fill: -color-primary;"/>
+                    </VBox>
+                </HBox>
+                <VBox styleClass="stat-card">
+                    <Label text="REGISTERED STUDENTS" styleClass="stat-label"/>
+                    <Label fx:id="lblAdminTotalStudents" text="--" styleClass="stat-value" style="-fx-text-fill: -color-primary;"/>
+                </VBox>
+            </VBox>
+
+            <!-- Right: JavaFX PieChart -->
+            <VBox HBox.hgrow="ALWAYS" styleClass="card" alignment="CENTER">
+                <Label text="Live Seating Capacity Distribution" styleClass="text-heading" style="-fx-padding: 0 0 10 0;"/>
+                <PieChart fx:id="chartOccupancy" prefHeight="240" legendVisible="true"/>
+            </VBox>
+        </HBox>
+
+        <!-- Seats Inventory Table -->
+        <VBox spacing="10" styleClass="card">
+            <HBox alignment="CENTER_LEFT">
+                <VBox spacing="2">
+                    <Label text="All Library Seats Inventory" styleClass="text-heading"/>
+                    <Label text="Overview of physical seating spaces across all library zones" styleClass="text-muted"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+            </HBox>
+
+            <TableView fx:id="tblAdminSeats" prefHeight="260" styleClass="table-view">
+                <columns>
+                    <TableColumn fx:id="colSeatId" text="ID" prefWidth="60"/>
+                    <TableColumn fx:id="colSeatNumber" text="Seat Code" prefWidth="120"/>
+                    <TableColumn fx:id="colSeatZone" text="Zone Name" prefWidth="240"/>
+                    <TableColumn fx:id="colSeatFacilities" text="Facilities Available" prefWidth="300"/>
+                </columns>
+                <placeholder>
+                    <Label text="No seats found." styleClass="text-muted"/>
+                </placeholder>
+            </TableView>
+        </VBox>
+
+    </VBox>
+</ScrollPane>

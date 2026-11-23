@@ -9,11 +9,9 @@ import com.library.seatmgmt.dao.impl.ZoneDAOImpl;
 import com.library.seatmgmt.model.Booking;
 import com.library.seatmgmt.model.Seat;
 import com.library.seatmgmt.model.Zone;
-import com.library.seatmgmt.model.enums.SeatStatus;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -51,11 +49,6 @@ public class SeatService {
     public List<Seat> getAvailableSeatsForSlot(int zoneId, LocalDate date, LocalTime start, LocalTime end) {
         List<Seat> allSeats = seatDAO.findByZoneId(zoneId);
 
-        // Filter out seats currently in maintenance
-        List<Seat> operationalSeats = allSeats.stream()
-                .filter(s -> s.getStatus() == SeatStatus.AVAILABLE)
-                .toList();
-
         // Get all active bookings for this zone and date
         List<Booking> zoneBookings = bookingDAO.findByDateAndZone(date, zoneId);
 
@@ -66,20 +59,16 @@ public class SeatService {
                 .collect(Collectors.toSet());
 
         // Return only seats not in conflict
-        return operationalSeats.stream()
+        return allSeats.stream()
                 .filter(s -> !conflictingSeatIds.contains(s.getId()))
                 .collect(Collectors.toList());
     }
 
     /**
      * Determines the dynamic status of a seat for a specific date and time slot.
-     * Returns: "AVAILABLE", "RESERVED", "OCCUPIED", or "MAINTENANCE"
+     * Returns: "AVAILABLE", "RESERVED", or "OCCUPIED"
      */
     public String getSeatStatusForSlot(Seat seat, LocalDate date, LocalTime start, LocalTime end) {
-        if (seat.getStatus() == SeatStatus.MAINTENANCE) {
-            return "MAINTENANCE";
-        }
-
         List<Booking> conflicts = bookingDAO.findOverlappingBookings(seat.getId(), date, start, end);
         if (conflicts.isEmpty()) {
             return "AVAILABLE";
@@ -87,9 +76,5 @@ public class SeatService {
 
         boolean anyOccupied = conflicts.stream().anyMatch(b -> b.getStatus().name().equals("OCCUPIED"));
         return anyOccupied ? "OCCUPIED" : "RESERVED";
-    }
-
-    public boolean updateSeatStatus(int seatId, SeatStatus status) {
-        return seatDAO.updateStatus(seatId, status);
     }
 }

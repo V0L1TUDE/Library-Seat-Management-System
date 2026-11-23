@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.library.seatmgmt.controller.ReportsController"
+            fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;">
+
+    <VBox spacing="20" style="-fx-padding: 6;">
+
+        <!-- Analytics Overview Cards -->
+        <HBox spacing="16">
+            <VBox HBox.hgrow="ALWAYS" styleClass="stat-card">
+                <Label text="TOTAL RESERVATIONS" styleClass="stat-label"/>
+                <Label fx:id="lblTotalBookingsCount" text="--" styleClass="stat-value"/>
+                <Label text="All-time booking records" styleClass="text-muted"/>
+            </VBox>
+            <VBox HBox.hgrow="ALWAYS" styleClass="stat-card">
+                <Label text="COMPLETED SESSIONS" styleClass="stat-label"/>
+                <Label fx:id="lblCompletedCount" text="--" styleClass="stat-value" style="-fx-text-fill: -color-primary;"/>
+                <Label text="Successfully checked out" styleClass="text-muted"/>
+            </VBox>
+            <VBox HBox.hgrow="ALWAYS" styleClass="stat-card">
+                <Label text="NO-SHOW INCIDENTS" styleClass="stat-label"/>
+                <Label fx:id="lblNoShowCount" text="--" styleClass="stat-value" style="-fx-text-fill: -color-occupied-border;"/>
+                <Label text="Grace period auto-releases" styleClass="text-muted"/>
+            </VBox>
+            <VBox HBox.hgrow="ALWAYS" styleClass="stat-card">
+                <Label text="ESTIMATED PEAK TRAFFIC" styleClass="stat-label"/>
+                <Label text="11 AM - 02 PM" styleClass="stat-value" style="-fx-font-size: 20px; -fx-text-fill: -color-reserved-border;"/>
+                <Label text="Busiest study window" styleClass="text-muted"/>
+            </VBox>
+        </HBox>
+
+        <!-- Export Toolbar Card -->
+        <HBox spacing="16" alignment="CENTER_LEFT" styleClass="card" style="-fx-padding: 16 22;">
+            <VBox spacing="2">
+                <Label text="Export Full System Activity Log" styleClass="text-heading"/>
+                <Label text="Generates a formatted CSV spreadsheet file in the reports/ directory" styleClass="text-muted"/>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="📥 Export Bookings to CSV" onAction="#handleExportCsv" styleClass="btn-primary" style="-fx-padding: 10 20;"/>
+        </HBox>
+
+        <!-- System Activity Log Table -->
+        <VBox spacing="10" styleClass="card">
+            <HBox alignment="CENTER_LEFT">
+                <VBox spacing="2">
+                    <Label text="Live System Audit Logs" styleClass="text-heading"/>
+                    <Label text="Tracks authentication, reservations, cancellations, and no-show releases" styleClass="text-muted"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Refresh Logs" onAction="#loadReportData" styleClass="btn-secondary" style="-fx-font-size: 11px;"/>
+            </HBox>
+
+            <TableView fx:id="tblActivityLogs" prefHeight="280" styleClass="table-view">
+                <columns>
+                    <TableColumn fx:id="colLogId" text="ID" prefWidth="60"/>
+                    <TableColumn fx:id="colLogUser" text="User" prefWidth="120"/>
+                    <TableColumn fx:id="colLogAction" text="Action Code" prefWidth="180"/>
+                    <TableColumn fx:id="colLogDetails" text="Event Description" prefWidth="380"/>
+                    <TableColumn fx:id="colLogTime" text="Timestamp" prefWidth="160"/>
+                </columns>
+                <placeholder>
+                    <Label text="No activity logs recorded." styleClass="text-muted"/>
+                </placeholder>
+            </TableView>
+        </VBox>
+
+    </VBox>
+</ScrollPane>

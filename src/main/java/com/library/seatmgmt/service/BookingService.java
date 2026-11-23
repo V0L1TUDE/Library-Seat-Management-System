@@ -58,9 +58,6 @@ public class BookingService {
         }
 
         Seat seat = seatOpt.get();
-        if (seat.getStatus() == SeatStatus.MAINTENANCE) {
-            throw new SeatUnavailableException("Seat " + seat.getSeatNumber() + " is currently under maintenance.");
-        }
 
         // 3. Atomically create booking via transaction
         Booking booking = new Booking(userId, seatId, date, start, end);

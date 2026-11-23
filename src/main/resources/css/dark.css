@@ -1,0 +1,54 @@
+/* ============================================================
+   SMART LIBRARY SEAT MANAGEMENT SYSTEM - DESIGN SYSTEM (DARK)
+   ============================================================ */
+
+.root {
+    -color-primary: #2D5A49;
+    -color-primary-hover: #386E5A;
+    -color-primary-light: #1E382E;
+    -color-secondary: #748A7D;
+    -color-bg-app: #121815;
+    -color-surface: #1B2420;
+    -color-border: #2A3831;
+    -color-text-main: #ECF1EE;
+    -color-text-muted: #8E9E96;
+
+    -color-available-bg: #153322;
+    -color-available-border: #2D7A4C;
+    -color-available-text: #9EE0B7;
+
+    -color-reserved-bg: #3B2811;
+    -color-reserved-border: #D9822B;
+    -color-reserved-text: #FAD19A;
+
+    -color-occupied-bg: #3B1616;
+    -color-occupied-border: #C94A4A;
+    -color-occupied-text: #FBB8B8;
+
+    -color-maintenance-bg: #232A26;
+    -color-maintenance-border: #4D5752;
+    -color-maintenance-text: #96A29C;
+
+    -color-selected-bg: #142E4F;
+    -color-selected-border: #3B82F6;
+    -color-selected-text: #93C5FD;
+
+    -fx-background-color: -color-bg-app;
+}
+
+.sidebar {
+    -fx-background-color: #0E1311;
+}
+
+.topbar {
+    -fx-background-color: -color-surface;
+    -fx-border-color: -color-border;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #161D19;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #232E29;
+}

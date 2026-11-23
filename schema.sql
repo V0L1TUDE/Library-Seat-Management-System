@@ -102,7 +102,7 @@ INSERT INTO seats (zone_id, seat_number, has_power, is_near_window, has_pc, stat
 (1, 'A-01', TRUE, TRUE, FALSE, 'AVAILABLE'),
 (1, 'A-02', TRUE, TRUE, FALSE, 'AVAILABLE'),
 (1, 'A-03', TRUE, FALSE, FALSE, 'AVAILABLE'),
-(1, 'A-04', TRUE, FALSE, FALSE, 'MAINTENANCE'),
+(1, 'A-04', TRUE, FALSE, FALSE, 'AVAILABLE'),
 (1, 'A-05', TRUE, TRUE, FALSE, 'AVAILABLE');
 
 -- Seed Seats for ZONE-B (Digital Lab: All have PCs and power)
