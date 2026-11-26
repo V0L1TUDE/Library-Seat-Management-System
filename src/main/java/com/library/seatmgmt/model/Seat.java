@@ -17,7 +17,7 @@ public class Seat implements Serializable {
     private boolean hasPower;          // AC power socket available
     private boolean nearWindow;        // Natural light / window view
     private boolean hasPc;             // Desktop computer provided
-    private SeatStatus status;         // AVAILABLE, MAINTENANCE
+    private SeatStatus status;         // AVAILABLE
     private LocalDateTime createdAt;
 
     // Transient runtime fields for UI display

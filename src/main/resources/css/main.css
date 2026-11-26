@@ -28,10 +28,6 @@
     -color-occupied-border: #DC2626;
     -color-occupied-text: #991B1B;
 
-    -color-maintenance-bg: #F3F4F6;
-    -color-maintenance-border: #9CA3AF;
-    -color-maintenance-text: #4B5563;
-
     -color-selected-bg: #FFE4E6;
     -color-selected-border: #7F1D1D;
     -color-selected-text: #7F1D1D;
@@ -333,16 +329,6 @@
     -fx-text-fill: -color-occupied-text;
 }
 
-.seat-maintenance {
-    -fx-background-color: -color-maintenance-bg;
-    -fx-border-color: -color-maintenance-border;
-    -fx-opacity: 0.78;
-    -fx-cursor: default;
-}
-.seat-maintenance .seat-tile-number, .seat-maintenance .seat-tile-icons {
-    -fx-text-fill: -color-maintenance-text;
-}
-
 .seat-selected {
     -fx-background-color: -color-selected-bg;
     -fx-border-color: -color-selected-border;
@@ -373,11 +359,6 @@
 .badge-occupied {
     -fx-background-color: -color-occupied-bg;
     -fx-text-fill: -color-occupied-text;
-}
-
-.badge-maintenance {
-    -fx-background-color: -color-maintenance-bg;
-    -fx-text-fill: -color-maintenance-text;
 }
 
 .badge-completed {
@@ -456,4 +437,3 @@
 .default-color0.chart-pie { -fx-pie-color: #16A34A; } /* Available: Green */
 .default-color1.chart-pie { -fx-pie-color: #D97706; } /* Reserved: Amber */
 .default-color2.chart-pie { -fx-pie-color: #DC2626; } /* Occupied: Red */
-.default-color3.chart-pie { -fx-pie-color: #9CA3AF; } /* Maintenance: Grey */

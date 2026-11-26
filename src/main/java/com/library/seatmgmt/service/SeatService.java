@@ -143,13 +143,9 @@ public class SeatService {
 
     /**
      * Determines the dynamic status of a seat for a specific date and time slot.
-     * Returns: "AVAILABLE", "RESERVED", "OCCUPIED", or "MAINTENANCE"
+     * Returns: "AVAILABLE", "RESERVED", or "OCCUPIED"
      */
     public String getSeatStatusForSlot(Seat seat, LocalDate date, LocalTime start, LocalTime end) {
-        if (seat.getStatus() == SeatStatus.MAINTENANCE) {
-            return "MAINTENANCE";
-        }
-
         List<Booking> conflicts = bookingDAO.findOverlappingBookings(seat.getId(), date, start, end);
         if (conflicts.isEmpty()) {
             return "AVAILABLE";

@@ -14,7 +14,6 @@ import com.library.seatmgmt.model.Floor;
 import com.library.seatmgmt.model.Seat;
 import com.library.seatmgmt.model.User;
 import com.library.seatmgmt.model.enums.BookingStatus;
-import com.library.seatmgmt.model.enums.SeatStatus;
 import com.library.seatmgmt.service.NoShowScannerService;
 import com.library.seatmgmt.service.SeatService;
 import com.library.seatmgmt.util.LoggerUtil;
@@ -33,7 +32,7 @@ import java.util.List;
 /**
  * Controller for the Administrator Floor & Seat Management Dashboard.
  * Supports floor-wise occupancy monitoring, adding new floors (auto-creating 20 seats),
- * managing individual seat maintenance statuses, and inspecting student bookings.
+ * viewing floor seat inventories, and inspecting student bookings.
  */
 public class AdminDashboardController {
 
@@ -43,7 +42,6 @@ public class AdminDashboardController {
     @FXML private Label lblAdminAvailable;
     @FXML private Label lblAdminReserved;
     @FXML private Label lblAdminOccupied;
-    @FXML private Label lblAdminMaintenance;
 
     @FXML private PieChart chartOccupancy;
 
@@ -59,13 +57,9 @@ public class AdminDashboardController {
     @FXML private TableColumn<Floor, String> colFloorAvail;
     @FXML private TableColumn<Floor, String> colFloorRes;
     @FXML private TableColumn<Floor, String> colFloorOcc;
-    @FXML private TableColumn<Floor, String> colFloorMaint;
 
-    // Tab 2: Floor Seat Status Management
+    // Tab 2: Floor Seats Inventory
     @FXML private ComboBox<Floor> cmbAdminFloor;
-    @FXML private Button btnSetAvailable;
-    @FXML private Button btnSetMaintenance;
-
     @FXML private TableView<Seat> tblAdminSeats;
     @FXML private TableColumn<Seat, String> colSeatId;
     @FXML private TableColumn<Seat, String> colSeatNumber;
@@ -103,12 +97,6 @@ public class AdminDashboardController {
         cmbAdminFloor.setOnAction(e -> refreshSeatsTable());
         cmbAdminBookingFloor.setOnAction(e -> refreshBookingsTable());
 
-        tblAdminSeats.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
-            boolean hasSel = newSel != null;
-            btnSetAvailable.setDisable(!hasSel || newSel.getStatus() == SeatStatus.AVAILABLE);
-            btnSetMaintenance.setDisable(!hasSel || newSel.getStatus() == SeatStatus.MAINTENANCE);
-        });
-
         loadAdminData();
     }
 
@@ -119,7 +107,6 @@ public class AdminDashboardController {
         colFloorAvail.setCellValueFactory(d -> new SimpleStringProperty(String.valueOf(d.getValue().getAvailableSeats())));
         colFloorRes.setCellValueFactory(d -> new SimpleStringProperty(String.valueOf(d.getValue().getReservedSeats())));
         colFloorOcc.setCellValueFactory(d -> new SimpleStringProperty(String.valueOf(d.getValue().getOccupiedSeats())));
-        colFloorMaint.setCellValueFactory(d -> new SimpleStringProperty(String.valueOf(d.getValue().getMaintenanceSeats())));
     }
 
     private void setupSeatTableColumns() {
@@ -138,9 +125,7 @@ public class AdminDashboardController {
                     setGraphic(null);
                 } else {
                     Label badge = new Label(item);
-                    badge.getStyleClass().add("badge");
-                    if ("Available".equalsIgnoreCase(item)) badge.getStyleClass().add("badge-available");
-                    else badge.getStyleClass().add("badge-maintenance");
+                    badge.getStyleClass().addAll("badge", "badge-available");
                     setGraphic(badge);
                 }
             }
@@ -163,10 +148,9 @@ public class AdminDashboardController {
         try {
             int totalFloors = floorDAO.countTotalFloors();
             int totalSeats = seatDAO.countTotalSeats();
-            int maintenance = seatDAO.countSeatsByStatus(SeatStatus.MAINTENANCE);
             int occupied = bookingDAO.countByStatus(BookingStatus.OCCUPIED);
             int reserved = bookingDAO.countByStatus(BookingStatus.RESERVED);
-            int available = Math.max(0, totalSeats - maintenance - occupied - reserved);
+            int available = Math.max(0, totalSeats - occupied - reserved);
             int students = userDAO.countTotalStudents();
 
             lblAdminTotalFloors.setText(String.valueOf(totalFloors));
@@ -175,17 +159,14 @@ public class AdminDashboardController {
             lblAdminAvailable.setText(String.valueOf(available));
             lblAdminReserved.setText(String.valueOf(reserved));
             lblAdminOccupied.setText(String.valueOf(occupied));
-            lblAdminMaintenance.setText(String.valueOf(maintenance));
 
             ObservableList<PieChart.Data> pieData = FXCollections.observableArrayList(
-                    new PieChart.Data("Available (" + available + ")", (totalSeats == 0 && occupied == 0 && reserved == 0 && maintenance == 0) ? 1 : available),
+                    new PieChart.Data("Available (" + available + ")", (totalSeats == 0 && occupied == 0 && reserved == 0) ? 1 : available),
                     new PieChart.Data("Reserved (" + reserved + ")", reserved),
-                    new PieChart.Data("Occupied (" + occupied + ")", occupied),
-                    new PieChart.Data("Maintenance (" + maintenance + ")", maintenance)
+                    new PieChart.Data("Occupied (" + occupied + ")", occupied)
             );
             chartOccupancy.setData(pieData);
 
-            // Refresh Floor ComboBoxes
             List<Floor> floors = seatService.getAllFloors();
             ObservableList<Floor> floorFilterList = FXCollections.observableArrayList();
             floorFilterList.add(ALL_FLOORS_OPTION);
@@ -199,7 +180,6 @@ public class AdminDashboardController {
             cmbAdminBookingFloor.setItems(floorFilterList);
             cmbAdminBookingFloor.setValue(prevBkFloor != null && floorFilterList.contains(prevBkFloor) ? prevBkFloor : ALL_FLOORS_OPTION);
 
-            // Floor-wise occupancy breakdown
             List<Floor> summary = seatService.getFloorOccupancySummary(LocalDate.now(), LocalTime.MIN, LocalTime.MAX);
             tblFloorSummary.setItems(FXCollections.observableArrayList(summary));
 
@@ -256,32 +236,6 @@ public class AdminDashboardController {
             loadAdminData();
         } catch (InvalidBookingException e) {
             showAlert(Alert.AlertType.WARNING, "Cannot Create Floor", e.getMessage());
-        }
-    }
-
-    @FXML
-    public void handleSetSeatAvailable() {
-        updateSelectedSeatStatus(SeatStatus.AVAILABLE);
-    }
-
-    @FXML
-    public void handleSetSeatMaintenance() {
-        updateSelectedSeatStatus(SeatStatus.MAINTENANCE);
-    }
-
-    private void updateSelectedSeatStatus(SeatStatus targetStatus) {
-        Seat sel = tblAdminSeats.getSelectionModel().getSelectedItem();
-        if (sel == null) return;
-
-        User admin = SessionContext.getInstance().getCurrentUser();
-        Integer adminId = admin != null ? admin.getId() : null;
-
-        if (seatService.updateSeatStatus(sel.getId(), targetStatus, adminId)) {
-            showAlert(Alert.AlertType.INFORMATION, "Seat Status Updated",
-                    sel.getFloorName() + " — Seat " + sel.getSeatNumber() + " is now " + targetStatus.getDisplayName() + ".");
-            loadAdminData();
-        } else {
-            showAlert(Alert.AlertType.ERROR, "Update Failed", "Could not update seat status in database.");
         }
     }
 

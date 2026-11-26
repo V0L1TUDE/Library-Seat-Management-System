@@ -147,7 +147,7 @@ public class SeatMapController {
 
         try {
             List<Seat> seats = seatService.getSeatsByFloor(floor.getFloorId());
-            int avail = 0, res = 0, occ = 0, maint = 0;
+            int avail = 0, res = 0, occ = 0;
 
             for (int idx = 0; idx < seats.size(); idx++) {
                 Seat s = seats.get(idx);
@@ -155,7 +155,6 @@ public class SeatMapController {
                 switch (status) {
                     case "RESERVED" -> res++;
                     case "OCCUPIED" -> occ++;
-                    case "MAINTENANCE" -> maint++;
                     default -> avail++;
                 }
 
@@ -168,8 +167,8 @@ public class SeatMapController {
             }
 
             lblFloorLiveStats.setText(String.format(
-                    "%d Seats  •  Available: %d  |  Reserved: %d  |  Occupied: %d  |  Maintenance: %d",
-                    seats.size(), avail, res, occ, maint));
+                    "%d Seats  •  Available: %d  |  Reserved: %d  |  Occupied: %d",
+                    seats.size(), avail, res, occ));
         } catch (Exception e) {
             LoggerUtil.severe("Error rendering floor seat grid", e);
         }
@@ -183,14 +182,13 @@ public class SeatMapController {
         switch (status) {
             case "RESERVED" -> tile.getStyleClass().add("seat-reserved");
             case "OCCUPIED" -> tile.getStyleClass().add("seat-occupied");
-            case "MAINTENANCE" -> tile.getStyleClass().add("seat-maintenance");
             default -> tile.getStyleClass().add("seat-available");
         }
 
         Label lblNum = new Label(seat.getSeatNumber());
         lblNum.getStyleClass().add("seat-tile-number");
 
-        Label lblSub = new Label("MAINTENANCE".equals(status) ? "🛠️ Maint." : seat.getFacilitiesDescription());
+        Label lblSub = new Label(seat.getFacilitiesDescription());
         lblSub.getStyleClass().add("seat-tile-icons");
 
         tile.getChildren().addAll(lblNum, lblSub);

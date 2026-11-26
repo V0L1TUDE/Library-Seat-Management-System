@@ -195,8 +195,8 @@ public class BookingDAOImpl implements BookingDAO {
             InMemoryDataStore store = InMemoryDataStore.getInstance();
             synchronized (store) {
                 Seat s = store.seats.get(booking.getSeatId());
-                if (s == null || s.getStatus() == SeatStatus.MAINTENANCE) {
-                    throw new BookingConflictException("This seat is currently under maintenance and cannot be reserved.");
+                if (s == null) {
+                    throw new BookingConflictException("The selected seat does not exist.");
                 }
 
                 boolean seatConflict = store.bookings.values().stream()
@@ -237,7 +237,7 @@ public class BookingDAOImpl implements BookingDAO {
             conn = DBConnection.getInstance().getConnection();
             conn.setAutoCommit(false);
 
-            // 1. Lock seat row and verify operational status (cannot book MAINTENANCE seats)
+            // 1. Lock seat row and load floor details
             String seatStatusSql = "SELECT s.seat_status, s.seat_number, s.floor_id, f.floor_name, f.floor_number " +
                                    "FROM seats s JOIN floors f ON s.floor_id = f.floor_id " +
                                    "WHERE s.seat_id = ? FOR UPDATE";
@@ -247,10 +247,6 @@ public class BookingDAOImpl implements BookingDAO {
                     if (!rs.next()) {
                         conn.rollback();
                         throw new BookingConflictException("The selected seat does not exist.");
-                    }
-                    if (!"AVAILABLE".equals(rs.getString("seat_status"))) {
-                        conn.rollback();
-                        throw new BookingConflictException("Seat " + rs.getString("seat_number") + " is currently under maintenance.");
                     }
                     booking.setSeatNumber(rs.getString("seat_number"));
                     booking.setFloorId(rs.getInt("floor_id"));

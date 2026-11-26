@@ -10,7 +10,6 @@ import com.library.seatmgmt.exception.InvalidBookingException;
 import com.library.seatmgmt.model.Booking;
 import com.library.seatmgmt.model.User;
 import com.library.seatmgmt.model.enums.BookingStatus;
-import com.library.seatmgmt.model.enums.SeatStatus;
 import com.library.seatmgmt.service.BookingService;
 import com.library.seatmgmt.util.LoggerUtil;
 import com.library.seatmgmt.util.SessionContext;
@@ -94,10 +93,9 @@ public class StudentDashboardController {
         try {
             int totalFloors = floorDAO.countTotalFloors();
             int total = seatDAO.countTotalSeats();
-            int maintenance = seatDAO.countSeatsByStatus(SeatStatus.MAINTENANCE);
             int occupied = bookingDAO.countByStatus(BookingStatus.OCCUPIED);
             int reserved = bookingDAO.countByStatus(BookingStatus.RESERVED);
-            int available = Math.max(0, total - maintenance - occupied - reserved);
+            int available = Math.max(0, total - occupied - reserved);
 
             lblTotalSeats.setText(String.valueOf(total));
             lblTotalFloorsSub.setText("Across " + totalFloors + " floors (20 seats/floor)");

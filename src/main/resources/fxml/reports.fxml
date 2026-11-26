@@ -53,7 +53,6 @@
                     <TableColumn fx:id="colRepAvail" text="Available" prefWidth="95"/>
                     <TableColumn fx:id="colRepRes" text="Reserved" prefWidth="95"/>
                     <TableColumn fx:id="colRepOcc" text="Occupied" prefWidth="95"/>
-                    <TableColumn fx:id="colRepMaint" text="Maintenance" prefWidth="105"/>
                     <TableColumn fx:id="colRepUtil" text="Utilization %" prefWidth="110"/>
                 </columns>
             </TableView>

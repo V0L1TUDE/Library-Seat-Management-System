@@ -86,14 +86,6 @@ public final class InMemoryDataStore {
         generateSeatsForFloor(f3, true);
         generateSeatsForFloor(f4, false);
 
-        // Mark 2 sample maintenance seats matching schema.sql
-        seats.values().stream()
-                .filter(s -> s.getFloorId() == 1 && "S-19".equals(s.getSeatNumber()))
-                .findFirst().ifPresent(s -> s.setStatus(SeatStatus.MAINTENANCE));
-        seats.values().stream()
-                .filter(s -> s.getFloorId() == 2 && "S-20".equals(s.getSeatNumber()))
-                .findFirst().ifPresent(s -> s.setStatus(SeatStatus.MAINTENANCE));
-
         // 4. Seed sample booking for student1
         Booking demoBooking = new Booking(101, 2, 1, LocalDate.now().plusDays(1), LocalTime.of(10, 0), LocalTime.of(12, 0),
                 BookingStatus.RESERVED, null, null, LocalDateTime.now(), LocalDateTime.now());

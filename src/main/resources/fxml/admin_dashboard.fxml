@@ -15,7 +15,7 @@
         <HBox spacing="14" alignment="CENTER_LEFT" styleClass="card" style="-fx-padding: 14 20;">
             <VBox>
                 <Label text="Floor &amp; Seat Operations" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
-                <Label text="Monitor floor occupancy, add new floors (20 seats each), and manage seat maintenance" styleClass="text-muted"/>
+                <Label text="Monitor floor occupancy, add new floors (20 seats each), and view student bookings" styleClass="text-muted"/>
             </VBox>
             <Region HBox.hgrow="ALWAYS"/>
             <Button text="⚡ Trigger No-Show Auto Release" onAction="#handleTriggerNoShowScan" styleClass="btn-primary"/>
@@ -52,10 +52,6 @@
                     <VBox HBox.hgrow="ALWAYS" styleClass="stat-card">
                         <Label text="OCCUPIED" styleClass="stat-label"/>
                         <Label fx:id="lblAdminOccupied" text="--" styleClass="stat-value" style="-fx-text-fill: -color-occupied-border;"/>
-                    </VBox>
-                    <VBox HBox.hgrow="ALWAYS" styleClass="stat-card">
-                        <Label text="MAINTENANCE" styleClass="stat-label"/>
-                        <Label fx:id="lblAdminMaintenance" text="--" styleClass="stat-value" style="-fx-text-fill: -color-maintenance-text;"/>
                     </VBox>
                 </HBox>
             </VBox>
@@ -103,26 +99,23 @@
                                 <TableColumn fx:id="colFloorAvail" text="Available" prefWidth="95"/>
                                 <TableColumn fx:id="colFloorRes" text="Reserved" prefWidth="95"/>
                                 <TableColumn fx:id="colFloorOcc" text="Occupied" prefWidth="95"/>
-                                <TableColumn fx:id="colFloorMaint" text="Maintenance" prefWidth="105"/>
                             </columns>
                         </TableView>
                     </VBox>
                 </VBox>
             </Tab>
 
-            <!-- Tab 2: Manage Floor Seats & Maintenance Status -->
-            <Tab text="🪑 Seat Status Management">
+            <!-- Tab 2: Floor Seats Inventory -->
+            <Tab text="🪑 Floor Seats Inventory">
                 <VBox spacing="14" style="-fx-padding: 14 0 0 0;">
                     <HBox spacing="12" alignment="CENTER_LEFT" styleClass="card" style="-fx-padding: 12 18;">
                         <Label text="Filter by Floor:" style="-fx-font-weight: bold; -fx-font-size: 12px;"/>
                         <ComboBox fx:id="cmbAdminFloor" prefWidth="260" styleClass="combo-box"/>
                         <Region HBox.hgrow="ALWAYS"/>
-                        <Button fx:id="btnSetAvailable" text="✅ Set Available" onAction="#handleSetSeatAvailable" styleClass="btn-success" disable="true"/>
-                        <Button fx:id="btnSetMaintenance" text="🛠️ Set Maintenance" onAction="#handleSetSeatMaintenance" styleClass="btn-danger" disable="true"/>
                     </HBox>
 
                     <VBox spacing="10" styleClass="card">
-                        <Label text="Floor Seats Inventory (Select a seat to manage status)" styleClass="text-heading"/>
+                        <Label text="Floor Seats Inventory (20 Seats Per Floor)" styleClass="text-heading"/>
                         <TableView fx:id="tblAdminSeats" prefHeight="290" styleClass="table-view">
                             <columns>
                                 <TableColumn fx:id="colSeatId" text="ID" prefWidth="60"/>

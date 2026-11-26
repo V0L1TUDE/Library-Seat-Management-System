@@ -105,7 +105,7 @@ public class MainController {
     public void showAdminView() {
         setActiveNav(btnNavAdmin);
         lblPageTitle.setText("Floor & Seat Administration");
-        lblPageSubtitle.setText("Manage library floors (+20 seats), seat statuses, and monitor student bookings");
+        lblPageSubtitle.setText("Manage library floors (+20 seats), seat inventory, and monitor student bookings");
         loadView("/fxml/admin_dashboard.fxml");
     }
 

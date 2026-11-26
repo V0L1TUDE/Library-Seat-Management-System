@@ -29,10 +29,6 @@
     -color-occupied-border: #EF4444;
     -color-occupied-text: #FCA5A5;
 
-    -color-maintenance-bg: #23252A;
-    -color-maintenance-border: #6B7280;
-    -color-maintenance-text: #D1D5DB;
-
     -color-selected-bg: #4C0519;
     -color-selected-border: #FB7185;
     -color-selected-text: #FECDD3;
@@ -380,16 +376,6 @@
     -fx-text-fill: -color-occupied-text;
 }
 
-.seat-maintenance {
-    -fx-background-color: -color-maintenance-bg;
-    -fx-border-color: -color-maintenance-border;
-    -fx-opacity: 0.78;
-    -fx-cursor: default;
-}
-.seat-maintenance .seat-tile-number, .seat-maintenance .seat-tile-icons {
-    -fx-text-fill: -color-maintenance-text;
-}
-
 .seat-selected {
     -fx-background-color: -color-selected-bg;
     -fx-border-color: -color-selected-border;
@@ -420,11 +406,6 @@
 .badge-occupied {
     -fx-background-color: -color-occupied-bg;
     -fx-text-fill: -color-occupied-text;
-}
-
-.badge-maintenance {
-    -fx-background-color: -color-maintenance-bg;
-    -fx-text-fill: -color-maintenance-text;
 }
 
 .badge-completed {
@@ -559,7 +540,6 @@
 .default-color0.chart-pie { -fx-pie-color: #22C55E; }
 .default-color1.chart-pie { -fx-pie-color: #F59E0B; }
 .default-color2.chart-pie { -fx-pie-color: #EF4444; }
-.default-color3.chart-pie { -fx-pie-color: #6B7280; }
 
 .dialog-pane {
     -fx-background-color: -color-surface;

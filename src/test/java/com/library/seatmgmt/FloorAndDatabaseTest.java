@@ -118,14 +118,6 @@ public class FloorAndDatabaseTest {
         // 3. Cancel & verify
         assertTrue(bookingService.cancelBooking(created.getId(), 2));
         deleteTestBooking(created.getId());
-
-        // 4. Maintenance enforcement
-        assertTrue(seatService.updateSeatStatus(targetSeat.getId(), SeatStatus.MAINTENANCE, 1));
-        assertThrows(SeatUnavailableException.class, () ->
-                bookingService.createBooking(2, targetSeat.getId(), testDate, start, end));
-
-        // Restore seat status back to AVAILABLE
-        assertTrue(seatService.updateSeatStatus(targetSeat.getId(), SeatStatus.AVAILABLE, 1));
         assertNotNull(bookingDAO.findAllRecent(5));
     }
 

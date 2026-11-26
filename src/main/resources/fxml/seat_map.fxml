@@ -62,8 +62,8 @@
 
                 <Region HBox.hgrow="ALWAYS"/>
 
-                <!-- Persistent 4-Color Legend (Available, Reserved, Occupied, Maintenance) -->
-                <HBox spacing="12" alignment="CENTER" style="-fx-background-color: -color-bg-app; -fx-padding: 7 14; -fx-background-radius: 6; -fx-border-color: -color-border; -fx-border-width: 1;">
+                <!-- Persistent 3-Color Legend (Available, Reserved, Occupied) -->
+                <HBox spacing="14" alignment="CENTER" style="-fx-background-color: -color-bg-app; -fx-padding: 7 14; -fx-background-radius: 6; -fx-border-color: -color-border; -fx-border-width: 1;">
                     <HBox spacing="5" alignment="CENTER">
                         <Region prefWidth="12" prefHeight="12" style="-fx-background-color: -color-available-bg; -fx-border-color: -color-available-border; -fx-border-radius: 3; -fx-background-radius: 3;"/>
                         <Label text="Available" style="-fx-font-size: 11px;"/>
@@ -75,10 +75,6 @@
                     <HBox spacing="5" alignment="CENTER">
                         <Region prefWidth="12" prefHeight="12" style="-fx-background-color: -color-occupied-bg; -fx-border-color: -color-occupied-border; -fx-border-radius: 3; -fx-background-radius: 3;"/>
                         <Label text="Occupied" style="-fx-font-size: 11px;"/>
-                    </HBox>
-                    <HBox spacing="5" alignment="CENTER">
-                        <Region prefWidth="12" prefHeight="12" style="-fx-background-color: -color-maintenance-bg; -fx-border-color: -color-maintenance-border; -fx-border-radius: 3; -fx-background-radius: 3;"/>
-                        <Label text="Maintenance" style="-fx-font-size: 11px;"/>
                     </HBox>
                 </HBox>
             </HBox>

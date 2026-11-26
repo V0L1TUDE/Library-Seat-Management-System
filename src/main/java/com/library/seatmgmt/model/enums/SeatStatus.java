@@ -4,8 +4,7 @@ package com.library.seatmgmt.model.enums;
  * Physical operational status of a library seat.
  */
 public enum SeatStatus {
-    AVAILABLE("Available"),
-    MAINTENANCE("Under Maintenance");
+    AVAILABLE("Available");
 
     private final String displayName;
 

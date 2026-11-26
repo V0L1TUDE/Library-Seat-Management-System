@@ -40,7 +40,6 @@ public class ReportsController {
     @FXML private TableColumn<Floor, String> colRepAvail;
     @FXML private TableColumn<Floor, String> colRepRes;
     @FXML private TableColumn<Floor, String> colRepOcc;
-    @FXML private TableColumn<Floor, String> colRepMaint;
     @FXML private TableColumn<Floor, String> colRepUtil;
 
     @FXML private TableView<ActivityLog> tblActivityLogs;
@@ -69,7 +68,6 @@ public class ReportsController {
         colRepAvail.setCellValueFactory(d -> new SimpleStringProperty(String.valueOf(d.getValue().getAvailableSeats())));
         colRepRes.setCellValueFactory(d -> new SimpleStringProperty(String.valueOf(d.getValue().getReservedSeats())));
         colRepOcc.setCellValueFactory(d -> new SimpleStringProperty(String.valueOf(d.getValue().getOccupiedSeats())));
-        colRepMaint.setCellValueFactory(d -> new SimpleStringProperty(String.valueOf(d.getValue().getMaintenanceSeats())));
         colRepUtil.setCellValueFactory(d -> {
             int total = d.getValue().getTotalSeats();
             int used = d.getValue().getReservedSeats() + d.getValue().getOccupiedSeats();

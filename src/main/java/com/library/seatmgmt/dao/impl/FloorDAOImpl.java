@@ -267,9 +267,8 @@ public class FloorDAOImpl implements FloorDAO {
         List<Floor> floors = new ArrayList<>();
         String sql = "SELECT f.*, " +
                 "COUNT(DISTINCT s.seat_id) AS total_seats, " +
-                "COUNT(DISTINCT CASE WHEN s.seat_status = 'MAINTENANCE' THEN s.seat_id END) AS maintenance_seats, " +
-                "COUNT(DISTINCT CASE WHEN s.seat_status = 'AVAILABLE' AND b_occ.seat_id IS NOT NULL THEN s.seat_id END) AS occupied_seats, " +
-                "COUNT(DISTINCT CASE WHEN s.seat_status = 'AVAILABLE' AND b_occ.seat_id IS NULL AND b_res.seat_id IS NOT NULL THEN s.seat_id END) AS reserved_seats " +
+                "COUNT(DISTINCT CASE WHEN b_occ.seat_id IS NOT NULL THEN s.seat_id END) AS occupied_seats, " +
+                "COUNT(DISTINCT CASE WHEN b_occ.seat_id IS NULL AND b_res.seat_id IS NOT NULL THEN s.seat_id END) AS reserved_seats " +
                 "FROM floors f " +
                 "LEFT JOIN seats s ON f.floor_id = s.floor_id " +
                 "LEFT JOIN bookings b_occ ON s.seat_id = b_occ.seat_id AND b_occ.booking_date = ? AND b_occ.booking_status = 'OCCUPIED' " +
@@ -298,13 +297,11 @@ public class FloorDAOImpl implements FloorDAO {
                 while (rs.next()) {
                     Floor floor = mapResultSetToFloor(rs);
                     int total = rs.getInt("total_seats");
-                    int maint = rs.getInt("maintenance_seats");
                     int occ = rs.getInt("occupied_seats");
                     int res = rs.getInt("reserved_seats");
-                    int avail = Math.max(0, total - maint - occ - res);
+                    int avail = Math.max(0, total - occ - res);
 
                     floor.setTotalSeats(total);
-                    floor.setMaintenanceSeats(maint);
                     floor.setOccupiedSeats(occ);
                     floor.setReservedSeats(res);
                     floor.setAvailableSeats(avail);
@@ -326,11 +323,9 @@ public class FloorDAOImpl implements FloorDAO {
                     .filter(s -> s.getFloorId() == f.getFloorId())
                     .toList();
             int total = floorSeats.size();
-            int maint = (int) floorSeats.stream().filter(s -> s.getStatus() == SeatStatus.MAINTENANCE).count();
             int occ = 0;
             int res = 0;
             for (Seat s : floorSeats) {
-                if (s.getStatus() == SeatStatus.MAINTENANCE) continue;
                 List<Booking> overlaps = store.bookings.values().stream()
                         .filter(b -> b.getSeatId() == s.getId() && b.isOverlappingWith(date, start, end))
                         .toList();
@@ -339,10 +334,9 @@ public class FloorDAOImpl implements FloorDAO {
             }
             Floor copy = new Floor(f.getFloorId(), f.getFloorName(), f.getFloorNumber(), f.getDescription(), f.isActive(), f.getCreatedAt());
             copy.setTotalSeats(total);
-            copy.setMaintenanceSeats(maint);
             copy.setOccupiedSeats(occ);
             copy.setReservedSeats(res);
-            copy.setAvailableSeats(Math.max(0, total - maint - occ - res));
+            copy.setAvailableSeats(Math.max(0, total - occ - res));
             list.add(copy);
         }
         return list;

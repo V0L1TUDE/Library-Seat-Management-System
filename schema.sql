@@ -38,7 +38,7 @@ CREATE TABLE seats (
     seat_id INT AUTO_INCREMENT PRIMARY KEY,
     floor_id INT NOT NULL,
     seat_number VARCHAR(20) NOT NULL,
-    seat_status ENUM('AVAILABLE', 'MAINTENANCE') NOT NULL DEFAULT 'AVAILABLE',
+    seat_status ENUM('AVAILABLE') NOT NULL DEFAULT 'AVAILABLE',
     has_power BOOLEAN NOT NULL DEFAULT FALSE,
     is_near_window BOOLEAN NOT NULL DEFAULT FALSE,
     has_pc BOOLEAN NOT NULL DEFAULT FALSE,
@@ -135,10 +135,6 @@ INSERT IGNORE INTO floors (floor_name, floor_number, description) VALUES
 ('First Floor — Section 2', 1, 'Silent Reading Gallery & Individual Focused Study Pods (Seats 1 to 20).'),
 ('Second Floor — Section 3', 2, 'Digital Research Lab Equipped with Desktop PC Terminals (Seats 1 to 20).'),
 ('Third Floor — Section 4', 3, 'Collaborative Study Wing & Academic Project Tables (Seats 1 to 20).');
-
--- Mark 2 sample seats as MAINTENANCE so Admin & Student UI showcase Maintenance state
-UPDATE seats SET seat_status = 'MAINTENANCE' WHERE floor_id = 1 AND seat_number = 'S-19';
-UPDATE seats SET seat_status = 'MAINTENANCE' WHERE floor_id = 2 AND seat_number = 'S-20';
 
 -- Seed sample bookings for today so live occupancy & dashboard charts display rich state
 INSERT INTO bookings (student_id, seat_id, booking_date, start_time, end_time, booking_status, check_in_time)
