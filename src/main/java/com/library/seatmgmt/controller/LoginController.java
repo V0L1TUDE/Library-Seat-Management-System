@@ -60,20 +60,6 @@ public class LoginController {
         }
     }
 
-    @FXML
-    public void fillStudentCredentials() {
-        txtUsername.setText("student1");
-        txtPassword.setText("password123");
-        lblError.setVisible(false);
-    }
-
-    @FXML
-    public void fillAdminCredentials() {
-        txtUsername.setText("admin");
-        txtPassword.setText("password123");
-        lblError.setVisible(false);
-    }
-
     private void showError(String message) {
         lblError.setText(message);
         lblError.setVisible(true);

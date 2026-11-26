@@ -52,10 +52,15 @@ public class MainController {
             lblUserFullName.setText(user.getFullName());
             lblUserRolePill.setText(user.getRole().name());
 
-            // If user is Student, hide admin management button
+            // Role-based sidebar navigation visibility
             if (user.isStudent()) {
+                btnNavReports.setVisible(false);
+                btnNavReports.setManaged(false);
                 btnNavAdmin.setVisible(false);
                 btnNavAdmin.setManaged(false);
+            } else if (user.isAdmin()) {
+                btnNavMyBookings.setVisible(false);
+                btnNavMyBookings.setManaged(false);
             }
         }
 
