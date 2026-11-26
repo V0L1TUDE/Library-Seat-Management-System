@@ -27,7 +27,7 @@
             <columns>
                 <TableColumn fx:id="colId" text="ID" prefWidth="70"/>
                 <TableColumn fx:id="colSeat" text="Seat Code" prefWidth="100"/>
-                <TableColumn fx:id="colZone" text="Library Zone" prefWidth="190"/>
+                <TableColumn fx:id="colFloor" text="Library Floor" prefWidth="210"/>
                 <TableColumn fx:id="colDate" text="Date" prefWidth="120"/>
                 <TableColumn fx:id="colTime" text="Time Slot" prefWidth="180"/>
                 <TableColumn fx:id="colStatus" text="Status" prefWidth="130"/>

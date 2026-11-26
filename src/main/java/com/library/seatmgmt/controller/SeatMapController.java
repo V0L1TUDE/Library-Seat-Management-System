@@ -4,9 +4,9 @@ import com.library.seatmgmt.exception.BookingConflictException;
 import com.library.seatmgmt.exception.InvalidBookingException;
 import com.library.seatmgmt.exception.SeatUnavailableException;
 import com.library.seatmgmt.model.Booking;
+import com.library.seatmgmt.model.Floor;
 import com.library.seatmgmt.model.Seat;
 import com.library.seatmgmt.model.User;
-import com.library.seatmgmt.model.Zone;
 import com.library.seatmgmt.service.BookingService;
 import com.library.seatmgmt.service.RecommendationService;
 import com.library.seatmgmt.service.SeatService;
@@ -16,7 +16,7 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
-import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 
 import java.time.Duration;
@@ -28,12 +28,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Controller for the Interactive Seat Map.
- * Renders floor layout as dynamic visual seat pods and coordinates booking transactions.
+ * Controller for the Floor-Wise Interactive Seat Map.
+ * Displays 20 seats per floor in a neat 4x5 visual grid and coordinates booking transactions.
  */
 public class SeatMapController {
 
-    @FXML private ComboBox<Zone> cmbZone;
+    private static final int GRID_COLUMNS = 5; // 4 rows x 5 columns = 20 seats per floor
+
+    @FXML private ComboBox<Floor> cmbFloor;
     @FXML private DatePicker dpDate;
     @FXML private ComboBox<String> cmbStartTime;
     @FXML private ComboBox<String> cmbEndTime;
@@ -42,15 +44,17 @@ public class SeatMapController {
     @FXML private CheckBox chkWindow;
     @FXML private CheckBox chkPc;
 
-    @FXML private Label lblZoneHeader;
-    @FXML private Label lblZoneDescription;
-    @FXML private FlowPane seatGridPane;
+    @FXML private Label lblFloorHeader;
+    @FXML private Label lblFloorDescription;
+    @FXML private Label lblFloorLiveStats;
+    @FXML private GridPane seatGridPane;
 
-    // Drawer components
+    // Booking Summary Drawer components
     @FXML private VBox drawerEmptyState;
     @FXML private VBox drawerContent;
     @FXML private Label lblSummarySeatNumber;
-    @FXML private Label lblSummaryZoneName;
+    @FXML private Label lblSummaryFloorName;
+    @FXML private Label lblSummaryFloorShort;
     @FXML private Label lblSummaryDate;
     @FXML private Label lblSummaryTime;
     @FXML private Label lblSummaryDuration;
@@ -70,7 +74,7 @@ public class SeatMapController {
     @FXML
     public void initialize() {
         initTimeSlots();
-        initDateAndZones();
+        initDateAndFloors();
         handleRefreshGrid();
     }
 
@@ -83,7 +87,6 @@ public class SeatMapController {
         cmbStartTime.setItems(FXCollections.observableArrayList(times));
         cmbEndTime.setItems(FXCollections.observableArrayList(times));
 
-        // Pick a valid upcoming 2-hour default slot so immediate bookings never fail "in the past" validation
         LocalTime now = LocalTime.now();
         if (now.isBefore(LocalTime.of(9, 55))) {
             dpDate.setValue(LocalDate.now());
@@ -102,22 +105,22 @@ public class SeatMapController {
         }
     }
 
-    private void initDateAndZones() {
+    private void initDateAndFloors() {
         if (dpDate.getValue() == null) {
             dpDate.setValue(LocalDate.now());
         }
 
         try {
-            List<Zone> zones = seatService.getAllActiveZones();
-            if (!zones.isEmpty()) {
-                cmbZone.setItems(FXCollections.observableArrayList(zones));
-                cmbZone.setValue(zones.get(0));
+            List<Floor> floors = seatService.getAllActiveFloors();
+            if (!floors.isEmpty()) {
+                cmbFloor.setItems(FXCollections.observableArrayList(floors));
+                cmbFloor.setValue(floors.get(0));
             }
         } catch (Exception e) {
-            LoggerUtil.warning("Unable to fetch zones from database: " + e.getMessage());
+            LoggerUtil.warning("Unable to fetch floors from database: " + e.getMessage());
         }
 
-        cmbZone.setOnAction(e -> handleRefreshGrid());
+        cmbFloor.setOnAction(e -> handleRefreshGrid());
         dpDate.setOnAction(e -> handleRefreshGrid());
         cmbStartTime.setOnAction(e -> handleRefreshGrid());
         cmbEndTime.setOnAction(e -> handleRefreshGrid());
@@ -129,11 +132,11 @@ public class SeatMapController {
         selectedTile = null;
         updateDrawer();
 
-        Zone zone = cmbZone.getValue();
-        if (zone == null) return;
+        Floor floor = cmbFloor.getValue();
+        if (floor == null) return;
 
-        lblZoneHeader.setText(zone.getName());
-        lblZoneDescription.setText(zone.getDescription() != null ? zone.getDescription() : "Standard seating area");
+        lblFloorHeader.setText(floor.getFloorName());
+        lblFloorDescription.setText(floor.getDescription() != null ? floor.getDescription() : "Floor section (20 seats)");
 
         LocalDate date = dpDate.getValue() != null ? dpDate.getValue() : LocalDate.now();
         LocalTime start = parseTime(cmbStartTime.getValue());
@@ -143,44 +146,61 @@ public class SeatMapController {
         seatTileMap.clear();
 
         try {
-            List<Seat> seats = seatService.getSeatsByZone(zone.getId());
-            for (Seat s : seats) {
-                VBox tile = createSeatTile(s, date, start, end);
+            List<Seat> seats = seatService.getSeatsByFloor(floor.getFloorId());
+            int avail = 0, res = 0, occ = 0, maint = 0;
+
+            for (int idx = 0; idx < seats.size(); idx++) {
+                Seat s = seats.get(idx);
+                String status = seatService.getSeatStatusForSlot(s, date, start, end);
+                switch (status) {
+                    case "RESERVED" -> res++;
+                    case "OCCUPIED" -> occ++;
+                    case "MAINTENANCE" -> maint++;
+                    default -> avail++;
+                }
+
+                VBox tile = createSeatTile(s, status);
                 seatTileMap.put(s.getId(), tile);
-                seatGridPane.getChildren().add(tile);
+
+                int col = idx % GRID_COLUMNS;
+                int row = idx / GRID_COLUMNS;
+                seatGridPane.add(tile, col, row);
             }
+
+            lblFloorLiveStats.setText(String.format(
+                    "%d Seats  •  Available: %d  |  Reserved: %d  |  Occupied: %d  |  Maintenance: %d",
+                    seats.size(), avail, res, occ, maint));
         } catch (Exception e) {
-            LoggerUtil.severe("Error rendering seat grid", e);
+            LoggerUtil.severe("Error rendering floor seat grid", e);
         }
     }
 
-    private VBox createSeatTile(Seat seat, LocalDate date, LocalTime start, LocalTime end) {
+    private VBox createSeatTile(Seat seat, String status) {
         VBox tile = new VBox(4);
         tile.setAlignment(Pos.CENTER);
         tile.getStyleClass().add("seat-tile");
 
-        // Dynamic State check
-        String status = seatService.getSeatStatusForSlot(seat, date, start, end);
-
         switch (status) {
             case "RESERVED" -> tile.getStyleClass().add("seat-reserved");
             case "OCCUPIED" -> tile.getStyleClass().add("seat-occupied");
+            case "MAINTENANCE" -> tile.getStyleClass().add("seat-maintenance");
             default -> tile.getStyleClass().add("seat-available");
         }
 
         Label lblNum = new Label(seat.getSeatNumber());
         lblNum.getStyleClass().add("seat-tile-number");
 
-        Label lblIcons = new Label(seat.getFacilitiesDescription());
-        lblIcons.getStyleClass().add("seat-tile-icons");
+        Label lblSub = new Label("MAINTENANCE".equals(status) ? "🛠️ Maint." : seat.getFacilitiesDescription());
+        lblSub.getStyleClass().add("seat-tile-icons");
 
-        tile.getChildren().addAll(lblNum, lblIcons);
+        tile.getChildren().addAll(lblNum, lblSub);
 
-        // Tooltip with details
-        Tooltip tip = new Tooltip("Seat " + seat.getSeatNumber() + "\nStatus: " + status + "\n" + seat.getFacilitiesDescription());
+        Tooltip tip = new Tooltip("Seat " + seat.getSeatNumber() +
+                "\nFloor: " + (seat.getFloorName() != null ? seat.getFloorName() : "N/A") +
+                "\nStatus: " + status +
+                "\n" + seat.getFacilitiesDescription());
         Tooltip.install(tile, tip);
 
-        // Click Handler (Only if Available)
         if ("AVAILABLE".equals(status)) {
             tile.setOnMouseClicked(e -> {
                 if (selectedTile != null) {
@@ -208,8 +228,10 @@ public class SeatMapController {
             drawerContent.setVisible(true);
             drawerContent.setManaged(true);
 
-            lblSummarySeatNumber.setText(selectedSeat.getSeatNumber());
-            lblSummaryZoneName.setText(cmbZone.getValue() != null ? cmbZone.getValue().getName() : "");
+            Floor floor = cmbFloor.getValue();
+            lblSummarySeatNumber.setText("Seat " + selectedSeat.getSeatNumber());
+            lblSummaryFloorName.setText(floor != null ? floor.getFloorName() : "");
+            lblSummaryFloorShort.setText(floor != null ? "Floor " + floor.getFloorNumber() : "--");
             lblSummaryDate.setText(dpDate.getValue() != null ? dpDate.getValue().toString() : LocalDate.now().toString());
             lblSummaryTime.setText(cmbStartTime.getValue() + " - " + cmbEndTime.getValue());
 
@@ -224,22 +246,21 @@ public class SeatMapController {
 
     @FXML
     public void handleSmartRecommend() {
-        Zone zone = cmbZone.getValue();
-        if (zone == null) return;
+        Floor floor = cmbFloor.getValue();
+        if (floor == null) return;
 
         LocalDate date = dpDate.getValue() != null ? dpDate.getValue() : LocalDate.now();
         LocalTime start = parseTime(cmbStartTime.getValue());
         LocalTime end = parseTime(cmbEndTime.getValue());
 
         List<Seat> recommended = recommendationService.recommendSeats(
-                zone.getId(), date, start, end,
+                floor.getFloorId(), date, start, end,
                 chkPower.isSelected(), chkWindow.isSelected(), chkPc.isSelected()
         );
 
         if (recommended.isEmpty()) {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION, "No available seats match your criteria in this zone for the selected time slot.", ButtonType.OK);
-            alert.setHeaderText("No Match Found");
-            alert.showAndWait();
+            showAlert(Alert.AlertType.INFORMATION, "No Match Found",
+                    "No available seats match your criteria on " + floor.getFloorName() + " for the selected slot.");
         } else {
             Seat best = recommended.get(0);
             handleRefreshGrid();
@@ -251,11 +272,9 @@ public class SeatMapController {
                 updateDrawer();
             }
 
-            Alert alert = new Alert(Alert.AlertType.INFORMATION,
-                    "Best matched seat for your preferences: " + best.getSeatNumber() +
-                    " (" + best.getFacilitiesDescription() + ")", ButtonType.OK);
-            alert.setHeaderText("Smart Recommendation");
-            alert.showAndWait();
+            showAlert(Alert.AlertType.INFORMATION, "Smart Recommendation",
+                    "Best matched seat on " + floor.getFloorName() + ": " + best.getSeatNumber() +
+                    " (" + best.getFacilitiesDescription() + ")");
         }
     }
 
@@ -269,15 +288,19 @@ public class SeatMapController {
             return;
         }
 
-        LocalDate date = dpDate.getValue();
+        Floor floor = cmbFloor.getValue();
+        LocalDate date = dpDate.getValue() != null ? dpDate.getValue() : LocalDate.now();
         LocalTime start = parseTime(cmbStartTime.getValue());
         LocalTime end = parseTime(cmbEndTime.getValue());
 
         try {
             Booking booking = bookingService.createBooking(user.getId(), selectedSeat.getId(), date, start, end);
+            String floorLabel = floor != null ? floor.getFloorName() : (booking.getFloorName() != null ? booking.getFloorName() : "Selected Floor");
             showAlert(Alert.AlertType.INFORMATION, "Reservation Confirmed!",
-                    "Seat " + selectedSeat.getSeatNumber() + " reserved successfully.\n" +
-                    "Booking ID: #" + booking.getId() + "\nTime: " + booking.getFormattedTimeSlot());
+                    "Floor: " + floorLabel + "\n" +
+                    "Seat Number: " + selectedSeat.getSeatNumber() + "\n" +
+                    "Booking ID: #" + booking.getId() + "\n" +
+                    "Date & Time: " + date + " (" + booking.getFormattedTimeSlot() + ")");
 
             handleRefreshGrid();
         } catch (BookingConflictException | SeatUnavailableException | InvalidBookingException e) {

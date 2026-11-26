@@ -80,8 +80,8 @@ public class MainController {
     @FXML
     public void showSeatMap() {
         setActiveNav(btnNavSeatMap);
-        lblPageTitle.setText("Interactive Seat Map");
-        lblPageSubtitle.setText("Select your preferred study zone and reserve an available seat");
+        lblPageTitle.setText("Floor-Wise Seat Map");
+        lblPageSubtitle.setText("Select a library floor (20 seats per section) and reserve an available seat");
         loadView("/fxml/seat_map.fxml");
     }
 
@@ -97,15 +97,15 @@ public class MainController {
     public void showReports() {
         setActiveNav(btnNavReports);
         lblPageTitle.setText("Reports & Analytics");
-        lblPageSubtitle.setText("Seat utilization insights, peak hours, and CSV export");
+        lblPageSubtitle.setText("Floor-wise utilization reports, peak hours, and CSV export");
         loadView("/fxml/reports.fxml");
     }
 
     @FXML
     public void showAdminView() {
         setActiveNav(btnNavAdmin);
-        lblPageTitle.setText("Administrative Seat Control");
-        lblPageSubtitle.setText("Manage zones, monitor bookings, and inspect live capacity");
+        lblPageTitle.setText("Floor & Seat Administration");
+        lblPageSubtitle.setText("Manage library floors (+20 seats), seat statuses, and monitor student bookings");
         loadView("/fxml/admin_dashboard.fxml");
     }
 

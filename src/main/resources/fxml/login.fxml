@@ -9,26 +9,26 @@
            prefWidth="960" prefHeight="620" styleClass="root">
 
     <HBox alignment="CENTER" maxWidth="840" maxHeight="520" styleClass="card"
-          style="-fx-padding: 0; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 24, 0, 0, 4);">
+          style="-fx-padding: 0; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.10), 24, 0, 0, 4);">
 
-        <!-- Left Branding Panel -->
-        <VBox prefWidth="380" spacing="20" style="-fx-background-color: #142820; -fx-padding: 40; -fx-background-radius: 8 0 0 8;">
+        <!-- Left Branding Panel (Deep Crimson) -->
+        <VBox prefWidth="380" spacing="20" style="-fx-background-color: #450A0A; -fx-padding: 40; -fx-background-radius: 8 0 0 8;">
             <Label text="🏛️" style="-fx-font-size: 38px;"/>
             <VBox spacing="6">
                 <Label text="Smart Library" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #FFFFFF;"/>
-                <Label text="Seat Management System" style="-fx-font-size: 14px; -fx-text-fill: #A3B8AD;"/>
+                <Label text="Floor-Wise Seat Management System" style="-fx-font-size: 14px; -fx-text-fill: #FCA5A5;"/>
             </VBox>
 
-            <Label text="Reserve real-time library seating, check in to study pods, and minimize study space congestion across campus."
-                   wrapText="true" style="-fx-text-fill: #C2D1C9; -fx-font-size: 13px; -fx-line-spacing: 4;"/>
+            <Label text="Browse independent library floors, check real-time 20-seat section availability, and reserve your study desk across campus."
+                   wrapText="true" style="-fx-text-fill: #FECACA; -fx-font-size: 13px; -fx-line-spacing: 4;"/>
 
             <Region VBox.vgrow="ALWAYS"/>
 
-            <VBox spacing="8" style="-fx-background-color: rgba(255,255,255,0.06); -fx-padding: 14; -fx-background-radius: 6;">
-                <Label text="⚡ Fast Evaluation Access" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #7BDCB5;"/>
+            <VBox spacing="8" style="-fx-background-color: rgba(255,255,255,0.08); -fx-padding: 14; -fx-background-radius: 6; -fx-border-color: rgba(254,202,202,0.2); -fx-border-radius: 6;">
+                <Label text="⚡ Fast Evaluation Access" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #FECACA;"/>
                 <HBox spacing="10">
-                    <Button text="Student Login" onAction="#fillStudentCredentials" styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 4 10;"/>
-                    <Button text="Admin Login" onAction="#fillAdminCredentials" styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 4 10;"/>
+                    <Button text="Student Login" onAction="#fillStudentCredentials" styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 5 12;"/>
+                    <Button text="Admin Login" onAction="#fillAdminCredentials" styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 5 12;"/>
                 </HBox>
             </VBox>
         </VBox>
@@ -41,11 +41,11 @@
             </VBox>
 
             <Label fx:id="lblError" text="" wrapText="true" visible="false"
-                   style="-fx-text-fill: #C94A4A; -fx-background-color: #FEECEB; -fx-padding: 8 12; -fx-background-radius: 4; -fx-font-size: 12px;"/>
+                   style="-fx-text-fill: #991B1B; -fx-background-color: #FEE2E2; -fx-border-color: #FCA5A5; -fx-border-radius: 4; -fx-padding: 8 12; -fx-background-radius: 4; -fx-font-size: 12px;"/>
 
             <VBox spacing="6">
                 <Label text="Username or Roll Number" style="-fx-font-weight: bold; -fx-font-size: 12px;"/>
-                <TextField fx:id="txtUsername" promptText="e.g. student1 or alex" styleClass="text-field"/>
+                <TextField fx:id="txtUsername" promptText="e.g. student1 or admin" styleClass="text-field"/>
             </VBox>
 
             <VBox spacing="6">

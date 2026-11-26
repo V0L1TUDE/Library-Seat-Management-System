@@ -10,7 +10,9 @@ import java.util.Optional;
  */
 public interface SeatDAO {
     Optional<Seat> findById(int id);
+    Optional<Seat> findByFloorAndNumber(int floorId, String seatNumber);
     Optional<Seat> findByZoneAndNumber(int zoneId, String seatNumber);
+    List<Seat> findByFloorId(int floorId);
     List<Seat> findByZoneId(int zoneId);
     List<Seat> findAll();
     boolean save(Seat seat);

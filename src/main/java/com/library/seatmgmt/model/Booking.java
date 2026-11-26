@@ -31,7 +31,9 @@ public class Booking implements Serializable {
     private transient String studentName;
     private transient String studentIdNumber;
     private transient String seatNumber;
-    private transient String zoneName;
+    private transient int floorId;
+    private transient String floorName;
+    private transient int floorNumber;
 
     public Booking() {
         this.status = BookingStatus.RESERVED;
@@ -223,12 +225,36 @@ public class Booking implements Serializable {
         this.seatNumber = seatNumber;
     }
 
+    public int getFloorId() {
+        return floorId;
+    }
+
+    public void setFloorId(int floorId) {
+        this.floorId = floorId;
+    }
+
+    public String getFloorName() {
+        return floorName;
+    }
+
+    public void setFloorName(String floorName) {
+        this.floorName = floorName;
+    }
+
+    public int getFloorNumber() {
+        return floorNumber;
+    }
+
+    public void setFloorNumber(int floorNumber) {
+        this.floorNumber = floorNumber;
+    }
+
     public String getZoneName() {
-        return zoneName;
+        return floorName;
     }
 
     public void setZoneName(String zoneName) {
-        this.zoneName = zoneName;
+        this.floorName = zoneName;
     }
 
     @Override

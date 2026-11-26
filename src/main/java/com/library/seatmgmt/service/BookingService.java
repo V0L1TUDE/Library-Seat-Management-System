@@ -13,6 +13,7 @@ import com.library.seatmgmt.model.ActivityLog;
 import com.library.seatmgmt.model.Booking;
 import com.library.seatmgmt.model.Seat;
 import com.library.seatmgmt.model.enums.BookingStatus;
+import com.library.seatmgmt.model.enums.SeatStatus;
 import com.library.seatmgmt.util.LoggerUtil;
 import com.library.seatmgmt.util.ValidationUtil;
 
@@ -57,6 +58,9 @@ public class BookingService {
         }
 
         Seat seat = seatOpt.get();
+        if (seat.getStatus() == SeatStatus.MAINTENANCE) {
+            throw new SeatUnavailableException("Seat " + seat.getSeatNumber() + " is currently under maintenance.");
+        }
 
         // 3. Atomically create booking via transaction
         Booking booking = new Booking(userId, seatId, date, start, end);
@@ -67,8 +71,9 @@ public class BookingService {
         }
 
         // 4. Log event
+        String floorLabel = seat.getFloorName() != null ? seat.getFloorName() + ", " : "";
         logDAO.save(new ActivityLog(userId, "BOOKING_CREATED",
-                "Created booking #" + booking.getId() + " for Seat " + seat.getSeatNumber() + " on " + date));
+                "Created booking #" + booking.getId() + " for " + floorLabel + "Seat " + seat.getSeatNumber() + " on " + date));
 
         return booking;
     }

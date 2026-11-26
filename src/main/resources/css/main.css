@@ -1,36 +1,40 @@
 /* ============================================================
    SMART LIBRARY SEAT MANAGEMENT SYSTEM - DESIGN SYSTEM (LIGHT)
-   Theme: Academic Sanctuary (Forest Green, Sage, Warm Neutral)
+   Theme: Academic Crimson (Deep Red, Crimson, Crisp White & Light Grey)
    ============================================================ */
 
 .root {
-    -color-primary: #1E3A2F;
-    -color-primary-hover: #162E25;
-    -color-primary-light: #E8F0EC;
-    -color-primary-text: -color-primary;
-    -color-secondary: #8A9A86;
-    -color-bg-app: #F8F9F6;
+    -color-primary: #991B1B;
+    -color-primary-hover: #7F1D1D;
+    -color-primary-light: #FEE2E2;
+    -color-primary-text: #991B1B;
+    -color-secondary: #DC2626;
+    -color-bg-app: #F4F5F7;
     -color-surface: #FFFFFF;
-    -color-border: #E2E8E4;
-    -color-text-main: #1C2520;
-    -color-text-muted: #6B7A72;
+    -color-border: #E5E7EB;
+    -color-text-main: #1F2937;
+    -color-text-muted: #6B7280;
 
-    /* Status Tokens */
-    -color-available-bg: #EBF7EE;
-    -color-available-border: #2D7A4C;
-    -color-available-text: #1B5233;
+    /* Seat Status Tokens (Green / Amber / Red / Grey) */
+    -color-available-bg: #ECFDF5;
+    -color-available-border: #16A34A;
+    -color-available-text: #166534;
 
-    -color-reserved-bg: #FEF6E9;
-    -color-reserved-border: #D9822B;
-    -color-reserved-text: #935316;
+    -color-reserved-bg: #FFFBEB;
+    -color-reserved-border: #D97706;
+    -color-reserved-text: #92400E;
 
-    -color-occupied-bg: #FDEEE9;
-    -color-occupied-border: #C94A4A;
-    -color-occupied-text: #8A2A2A;
+    -color-occupied-bg: #FEF2F2;
+    -color-occupied-border: #DC2626;
+    -color-occupied-text: #991B1B;
 
-    -color-selected-bg: #E9F2FE;
-    -color-selected-border: #2563EB;
-    -color-selected-text: #1E40AF;
+    -color-maintenance-bg: #F3F4F6;
+    -color-maintenance-border: #9CA3AF;
+    -color-maintenance-text: #4B5563;
+
+    -color-selected-bg: #FFE4E6;
+    -color-selected-border: #7F1D1D;
+    -color-selected-text: #7F1D1D;
 
     -fx-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     -fx-font-size: 13px;
@@ -41,7 +45,7 @@
 .text-display {
     -fx-font-size: 22px;
     -fx-font-weight: bold;
-    -fx-text-fill: -color-text-main;
+    -fx-text-fill: -color-primary;
 }
 
 .text-heading {
@@ -68,7 +72,7 @@
 
 /* ----------------- SHELL & PANELS ----------------- */
 .sidebar {
-    -fx-background-color: #142820;
+    -fx-background-color: #450A0A;
     -fx-padding: 24 16;
     -fx-spacing: 8;
 }
@@ -81,12 +85,12 @@
 
 .sidebar-brand-subtitle {
     -fx-font-size: 11px;
-    -fx-text-fill: #A3B8AD;
+    -fx-text-fill: #FCA5A5;
 }
 
 .nav-button {
     -fx-background-color: transparent;
-    -fx-text-fill: #C2D1C9;
+    -fx-text-fill: #FDE8E8;
     -fx-font-size: 13px;
     -fx-font-weight: 500;
     -fx-padding: 10 14;
@@ -96,14 +100,16 @@
 }
 
 .nav-button:hover {
-    -fx-background-color: #1E3A2F;
+    -fx-background-color: #7F1D1D;
     -fx-text-fill: #FFFFFF;
 }
 
 .nav-button.active {
-    -fx-background-color: #26483B;
+    -fx-background-color: #991B1B;
     -fx-text-fill: #FFFFFF;
     -fx-font-weight: bold;
+    -fx-border-color: #FCA5A5;
+    -fx-border-width: 0 0 0 3;
 }
 
 .topbar {
@@ -130,8 +136,8 @@
 }
 
 .hero-card {
-    -fx-background-color: linear-gradient(to right, -color-surface, #F3F8F5);
-    -fx-border-color: -color-secondary;
+    -fx-background-color: linear-gradient(to right, #FFFFFF, #FEF2F2);
+    -fx-border-color: #FCA5A5;
 }
 
 /* User Badge Pill */
@@ -161,6 +167,9 @@
     -fx-background-color: -color-primary-light;
     -fx-padding: 14;
     -fx-background-radius: 6;
+    -fx-border-color: #FECACA;
+    -fx-border-radius: 6;
+    -fx-border-width: 1;
 }
 
 .drawer-seat-title {
@@ -221,12 +230,13 @@
 
 .btn-secondary:hover {
     -fx-background-color: -color-primary-light;
+    -fx-border-color: #FCA5A5;
 }
 
 .btn-danger {
-    -fx-background-color: #FEECEB;
-    -fx-text-fill: #C94A4A;
-    -fx-border-color: #F8C6C4;
+    -fx-background-color: #FEF2F2;
+    -fx-text-fill: #B91C1C;
+    -fx-border-color: #FECACA;
     -fx-border-width: 1;
     -fx-border-radius: 6;
     -fx-background-radius: 6;
@@ -237,14 +247,14 @@
 }
 
 .btn-danger:hover {
-    -fx-background-color: #C94A4A;
+    -fx-background-color: #DC2626;
     -fx-text-fill: #FFFFFF;
 }
 
 .btn-success {
-    -fx-background-color: #EBF7EE;
-    -fx-text-fill: #2D7A4C;
-    -fx-border-color: #BBE5C7;
+    -fx-background-color: #ECFDF5;
+    -fx-text-fill: #166534;
+    -fx-border-color: #A7F3D0;
     -fx-border-width: 1;
     -fx-border-radius: 6;
     -fx-background-radius: 6;
@@ -255,7 +265,7 @@
 }
 
 .btn-success:hover {
-    -fx-background-color: #2D7A4C;
+    -fx-background-color: #16A34A;
     -fx-text-fill: #FFFFFF;
 }
 
@@ -276,15 +286,15 @@
     -fx-background-color: #FFFFFF;
 }
 
-/* ----------------- SEAT TILES ----------------- */
+/* ----------------- SEAT TILES (4x5 FLOOR GRID) ----------------- */
 .seat-tile {
     -fx-background-radius: 8;
     -fx-border-radius: 8;
     -fx-border-width: 1.5;
     -fx-padding: 12 10;
     -fx-alignment: CENTER;
-    -fx-pref-width: 90;
-    -fx-pref-height: 80;
+    -fx-pref-width: 104;
+    -fx-pref-height: 82;
     -fx-cursor: hand;
 }
 
@@ -297,29 +307,40 @@
     -fx-font-size: 10px;
 }
 
-/* Seat States */
 .seat-available {
     -fx-background-color: -color-available-bg;
     -fx-border-color: -color-available-border;
 }
-.seat-available .seat-tile-number {
+.seat-available .seat-tile-number, .seat-available .seat-tile-icons {
     -fx-text-fill: -color-available-text;
 }
 
 .seat-reserved {
     -fx-background-color: -color-reserved-bg;
     -fx-border-color: -color-reserved-border;
+    -fx-cursor: default;
 }
-.seat-reserved .seat-tile-number {
+.seat-reserved .seat-tile-number, .seat-reserved .seat-tile-icons {
     -fx-text-fill: -color-reserved-text;
 }
 
 .seat-occupied {
     -fx-background-color: -color-occupied-bg;
     -fx-border-color: -color-occupied-border;
+    -fx-cursor: default;
 }
-.seat-occupied .seat-tile-number {
+.seat-occupied .seat-tile-number, .seat-occupied .seat-tile-icons {
     -fx-text-fill: -color-occupied-text;
+}
+
+.seat-maintenance {
+    -fx-background-color: -color-maintenance-bg;
+    -fx-border-color: -color-maintenance-border;
+    -fx-opacity: 0.78;
+    -fx-cursor: default;
+}
+.seat-maintenance .seat-tile-number, .seat-maintenance .seat-tile-icons {
+    -fx-text-fill: -color-maintenance-text;
 }
 
 .seat-selected {
@@ -327,7 +348,7 @@
     -fx-border-color: -color-selected-border;
     -fx-border-width: 2.5;
 }
-.seat-selected .seat-tile-number {
+.seat-selected .seat-tile-number, .seat-selected .seat-tile-icons {
     -fx-text-fill: -color-selected-text;
 }
 
@@ -354,14 +375,19 @@
     -fx-text-fill: -color-occupied-text;
 }
 
+.badge-maintenance {
+    -fx-background-color: -color-maintenance-bg;
+    -fx-text-fill: -color-maintenance-text;
+}
+
 .badge-completed {
-    -fx-background-color: #F1F3F5;
-    -fx-text-fill: #495057;
+    -fx-background-color: #F3F4F6;
+    -fx-text-fill: #4B5563;
 }
 
 .badge-cancelled, .badge-no-show {
-    -fx-background-color: #FEECEB;
-    -fx-text-fill: #C94A4A;
+    -fx-background-color: #FEE2E2;
+    -fx-text-fill: #991B1B;
 }
 
 /* ----------------- TABLE VIEW ----------------- */
@@ -374,7 +400,7 @@
 }
 
 .table-view .column-header-background {
-    -fx-background-color: #F2F5F3;
+    -fx-background-color: #F9FAFB;
 }
 
 .table-view .column-header {
@@ -396,9 +422,38 @@
 }
 
 .table-row-cell:hover {
-    -fx-background-color: #F8FAF9;
+    -fx-background-color: #FEF2F2;
 }
 
 .table-row-cell:selected {
     -fx-background-color: -color-primary-light;
 }
+
+/* ----------------- ADMIN TABS & PIE CHART ----------------- */
+.admin-tabs .tab-header-area .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+.admin-tabs .tab {
+    -fx-background-color: -color-surface;
+    -fx-border-color: -color-border;
+    -fx-border-radius: 6 6 0 0;
+    -fx-background-radius: 6 6 0 0;
+    -fx-padding: 8 16;
+    -fx-cursor: hand;
+}
+
+.admin-tabs .tab:selected {
+    -fx-background-color: -color-primary;
+    -fx-border-color: -color-primary;
+}
+
+.admin-tabs .tab:selected .tab-label {
+    -fx-text-fill: #FFFFFF;
+    -fx-font-weight: bold;
+}
+
+.default-color0.chart-pie { -fx-pie-color: #16A34A; } /* Available: Green */
+.default-color1.chart-pie { -fx-pie-color: #D97706; } /* Reserved: Amber */
+.default-color2.chart-pie { -fx-pie-color: #DC2626; } /* Occupied: Red */
+.default-color3.chart-pie { -fx-pie-color: #9CA3AF; } /* Maintenance: Grey */

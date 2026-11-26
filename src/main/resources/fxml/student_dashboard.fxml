@@ -15,7 +15,7 @@
             <VBox HBox.hgrow="ALWAYS" styleClass="stat-card">
                 <Label text="TOTAL SEATS" styleClass="stat-label"/>
                 <Label fx:id="lblTotalSeats" text="--" styleClass="stat-value"/>
-                <Label text="Across all 4 library zones" styleClass="text-muted"/>
+                <Label fx:id="lblTotalFloorsSub" text="20 seats per floor section" styleClass="text-muted"/>
             </VBox>
 
             <VBox HBox.hgrow="ALWAYS" styleClass="stat-card">
@@ -55,8 +55,8 @@
                     </VBox>
                     <Separator orientation="VERTICAL"/>
                     <VBox spacing="2">
-                        <Label text="Library Zone" styleClass="text-muted"/>
-                        <Label fx:id="lblNextZoneName" text="--" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+                        <Label text="Library Floor" styleClass="text-muted"/>
+                        <Label fx:id="lblNextFloorName" text="--" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
                     </VBox>
                     <Separator orientation="VERTICAL"/>
                     <VBox spacing="2">
@@ -74,7 +74,7 @@
             <!-- Quick Action Card -->
             <VBox prefWidth="320" spacing="14" styleClass="card">
                 <Label text="Need a Study Spot?" styleClass="text-heading"/>
-                <Label text="Find quiet reading pods, computer terminals, or discussion tables in real-time."
+                <Label text="Browse library floors, inspect 20-seat floor maps, and reserve an available desk in real-time."
                        wrapText="true" styleClass="text-muted" style="-fx-line-spacing: 3;"/>
                 <Region VBox.vgrow="ALWAYS"/>
                 <Button text="🪑 Reserve a Seat Now" onAction="#handleQuickBookSeat" maxWidth="Infinity" styleClass="btn-primary" style="-fx-padding: 12;"/>
@@ -96,7 +96,7 @@
                 <columns>
                     <TableColumn fx:id="colId" text="ID" prefWidth="60"/>
                     <TableColumn fx:id="colSeat" text="Seat" prefWidth="90"/>
-                    <TableColumn fx:id="colZone" text="Zone" prefWidth="170"/>
+                    <TableColumn fx:id="colFloor" text="Library Floor" prefWidth="210"/>
                     <TableColumn fx:id="colDate" text="Date" prefWidth="120"/>
                     <TableColumn fx:id="colTime" text="Time Slot" prefWidth="160"/>
                     <TableColumn fx:id="colStatus" text="Status" prefWidth="120"/>

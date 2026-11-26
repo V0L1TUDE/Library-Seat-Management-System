@@ -35,7 +35,7 @@ public final class FileUtil {
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             // Write CSV Header
-            writer.write("Booking_ID,Student_Name,Student_ID,Seat_Number,Zone,Date,Start_Time,End_Time,Status,Checked_In_At");
+            writer.write("Booking_ID,Student_Name,Student_ID,Seat_Number,Floor,Date,Start_Time,End_Time,Status,Checked_In_At");
             writer.newLine();
 
             // Write Records
@@ -44,14 +44,14 @@ public final class FileUtil {
                 String checkedInStr = (b.getCheckInTime() != null) ? b.getCheckInTime().format(tsFmt) : "N/A";
                 String studentName = (b.getStudentName() != null) ? b.getStudentName() : "Student";
                 String studentRoll = (b.getStudentIdNumber() != null) ? b.getStudentIdNumber() : "N/A";
-                String zoneName = (b.getZoneName() != null) ? b.getZoneName() : "Zone";
+                String floorName = (b.getFloorName() != null) ? b.getFloorName() : "Floor";
 
                 String line = String.format("%d,\"%s\",\"%s\",\"%s\",\"%s\",%s,%s,%s,%s,\"%s\"",
                         b.getId(),
                         escapeCsv(studentName),
                         escapeCsv(studentRoll),
                         escapeCsv(b.getSeatNumber()),
-                        escapeCsv(zoneName),
+                        escapeCsv(floorName),
                         b.getBookingDate(),
                         b.getStartTime(),
                         b.getEndTime(),

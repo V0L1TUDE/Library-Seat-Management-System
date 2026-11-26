@@ -8,28 +8,28 @@
       fx:controller="com.library.seatmgmt.controller.SeatMapController"
       spacing="20" style="-fx-padding: 6;">
 
-    <!-- Left Main Content: Filters + Visual Grid -->
+    <!-- Left Main Content: Floor Selector + Filters + 4x5 Visual Grid -->
     <VBox HBox.hgrow="ALWAYS" spacing="16">
 
         <!-- Filter Bar Card -->
         <VBox spacing="12" styleClass="card">
             <HBox spacing="16" alignment="CENTER_LEFT">
-                <VBox spacing="4" prefWidth="200">
-                    <Label text="Library Zone" style="-fx-font-weight: bold; -fx-font-size: 11px;"/>
-                    <ComboBox fx:id="cmbZone" maxWidth="Infinity" styleClass="combo-box"/>
+                <VBox spacing="4" prefWidth="250">
+                    <Label text="Select Library Floor" style="-fx-font-weight: bold; -fx-font-size: 11px;"/>
+                    <ComboBox fx:id="cmbFloor" maxWidth="Infinity" styleClass="combo-box"/>
                 </VBox>
 
-                <VBox spacing="4" prefWidth="150">
+                <VBox spacing="4" prefWidth="145">
                     <Label text="Date" style="-fx-font-weight: bold; -fx-font-size: 11px;"/>
                     <DatePicker fx:id="dpDate" maxWidth="Infinity" styleClass="date-picker"/>
                 </VBox>
 
-                <VBox spacing="4" prefWidth="120">
+                <VBox spacing="4" prefWidth="115">
                     <Label text="Start Time" style="-fx-font-weight: bold; -fx-font-size: 11px;"/>
                     <ComboBox fx:id="cmbStartTime" maxWidth="Infinity" styleClass="combo-box"/>
                 </VBox>
 
-                <VBox spacing="4" prefWidth="120">
+                <VBox spacing="4" prefWidth="115">
                     <Label text="End Time" style="-fx-font-weight: bold; -fx-font-size: 11px;"/>
                     <ComboBox fx:id="cmbEndTime" maxWidth="Infinity" styleClass="combo-box"/>
                 </VBox>
@@ -50,65 +50,75 @@
             </HBox>
         </VBox>
 
-        <!-- Seat Floor Map Container -->
+        <!-- Floor 20-Seat Layout Container -->
         <VBox VBox.vgrow="ALWAYS" spacing="12" styleClass="card">
-            <!-- Header & Visual Legend -->
-            <HBox alignment="CENTER_LEFT" spacing="16">
+            <!-- Header & 4-Color Status Legend -->
+            <HBox alignment="CENTER_LEFT" spacing="14">
                 <VBox spacing="2">
-                    <Label fx:id="lblZoneHeader" text="Zone Seating Layout" styleClass="text-heading"/>
-                    <Label fx:id="lblZoneDescription" text="Select an available seat pod below to reserve" styleClass="text-muted"/>
+                    <Label fx:id="lblFloorHeader" text="Floor Seating Layout" styleClass="text-heading"/>
+                    <Label fx:id="lblFloorDescription" text="Select an available green seat pod (4x5 layout, 20 seats per floor)" styleClass="text-muted"/>
+                    <Label fx:id="lblFloorLiveStats" text="20 Seats" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: -color-primary-text;"/>
                 </VBox>
 
                 <Region HBox.hgrow="ALWAYS"/>
 
-                <!-- Persistent Color Legend (Available, Reserved, Occupied) -->
-                <HBox spacing="14" alignment="CENTER" style="-fx-background-color: -color-bg-app; -fx-padding: 6 14; -fx-background-radius: 6; -fx-border-color: -color-border; -fx-border-width: 1;">
-                    <HBox spacing="6" alignment="CENTER">
+                <!-- Persistent 4-Color Legend (Available, Reserved, Occupied, Maintenance) -->
+                <HBox spacing="12" alignment="CENTER" style="-fx-background-color: -color-bg-app; -fx-padding: 7 14; -fx-background-radius: 6; -fx-border-color: -color-border; -fx-border-width: 1;">
+                    <HBox spacing="5" alignment="CENTER">
                         <Region prefWidth="12" prefHeight="12" style="-fx-background-color: -color-available-bg; -fx-border-color: -color-available-border; -fx-border-radius: 3; -fx-background-radius: 3;"/>
                         <Label text="Available" style="-fx-font-size: 11px;"/>
                     </HBox>
-                    <HBox spacing="6" alignment="CENTER">
+                    <HBox spacing="5" alignment="CENTER">
                         <Region prefWidth="12" prefHeight="12" style="-fx-background-color: -color-reserved-bg; -fx-border-color: -color-reserved-border; -fx-border-radius: 3; -fx-background-radius: 3;"/>
                         <Label text="Reserved" style="-fx-font-size: 11px;"/>
                     </HBox>
-                    <HBox spacing="6" alignment="CENTER">
+                    <HBox spacing="5" alignment="CENTER">
                         <Region prefWidth="12" prefHeight="12" style="-fx-background-color: -color-occupied-bg; -fx-border-color: -color-occupied-border; -fx-border-radius: 3; -fx-background-radius: 3;"/>
                         <Label text="Occupied" style="-fx-font-size: 11px;"/>
+                    </HBox>
+                    <HBox spacing="5" alignment="CENTER">
+                        <Region prefWidth="12" prefHeight="12" style="-fx-background-color: -color-maintenance-bg; -fx-border-color: -color-maintenance-border; -fx-border-radius: 3; -fx-background-radius: 3;"/>
+                        <Label text="Maintenance" style="-fx-font-size: 11px;"/>
                     </HBox>
                 </HBox>
             </HBox>
 
-            <!-- Scrollable Floor Grid -->
-            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 10;">
-                <FlowPane fx:id="seatGridPane" hgap="16" vgap="16" alignment="TOP_LEFT" style="-fx-padding: 10;"/>
+            <!-- Neat 4-Row x 5-Column Floor Seat Grid -->
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 6;">
+                <GridPane fx:id="seatGridPane" hgap="16" vgap="16" alignment="TOP_CENTER" style="-fx-padding: 12;"/>
             </ScrollPane>
         </VBox>
 
     </VBox>
 
     <!-- Right Side: Booking Summary Drawer -->
-    <VBox prefWidth="300" spacing="16" styleClass="card" style="-fx-background-color: -color-surface;">
+    <VBox prefWidth="300" spacing="16" styleClass="card">
         <Label text="Booking Summary" styleClass="text-heading"/>
 
         <VBox fx:id="drawerEmptyState" spacing="10" alignment="CENTER" VBox.vgrow="ALWAYS">
             <Label text="🪑" style="-fx-font-size: 36px; -fx-opacity: 0.5;"/>
             <Label text="No Seat Selected" style="-fx-font-weight: bold; -fx-text-fill: -color-text-muted;"/>
-            <Label text="Click on any available green seat tile in the grid to view details and confirm."
+            <Label text="Select a library floor and click any green Available seat tile (1–20) to view details and confirm."
                    wrapText="true" textAlignment="CENTER" styleClass="text-muted" style="-fx-font-size: 11px;"/>
         </VBox>
 
         <VBox fx:id="drawerContent" spacing="14" visible="false" managed="false">
             <VBox spacing="4" styleClass="drawer-seat-card">
-                <Label text="SELECTED SEAT" style="-fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: -color-primary-text;"/>
-                <Label fx:id="lblSummarySeatNumber" text="A-01" styleClass="drawer-seat-title"/>
-                <Label fx:id="lblSummaryZoneName" text="Silent Study Gallery" styleClass="text-muted"/>
+                <Label text="SELECTED FLOOR &amp; SEAT" style="-fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: -color-primary-text;"/>
+                <Label fx:id="lblSummarySeatNumber" text="S-01" styleClass="drawer-seat-title"/>
+                <Label fx:id="lblSummaryFloorName" text="Ground Floor — Section 1" styleClass="text-muted"/>
             </VBox>
 
             <VBox spacing="8" style="-fx-border-color: -color-border; -fx-border-width: 1 0 1 0; -fx-padding: 12 0;">
                 <HBox>
+                    <Label text="Floor:" styleClass="text-muted"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="lblSummaryFloorShort" text="Floor 0" style="-fx-font-weight: bold;"/>
+                </HBox>
+                <HBox>
                     <Label text="Date:" styleClass="text-muted"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Label fx:id="lblSummaryDate" text="2026-11-23" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="lblSummaryDate" text="2026-11-26" style="-fx-font-weight: bold;"/>
                 </HBox>
                 <HBox>
                     <Label text="Slot:" styleClass="text-muted"/>
@@ -118,7 +128,7 @@
                 <HBox>
                     <Label text="Duration:" styleClass="text-muted"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Label fx:id="lblSummaryDuration" text="2 hours" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="lblSummaryDuration" text="2 hr 0 min" style="-fx-font-weight: bold;"/>
                 </HBox>
                 <HBox>
                     <Label text="Facilities:" styleClass="text-muted"/>

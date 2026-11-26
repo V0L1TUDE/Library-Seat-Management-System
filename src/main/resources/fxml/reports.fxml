@@ -19,7 +19,7 @@
             </VBox>
             <VBox HBox.hgrow="ALWAYS" styleClass="stat-card">
                 <Label text="COMPLETED SESSIONS" styleClass="stat-label"/>
-                <Label fx:id="lblCompletedCount" text="--" styleClass="stat-value" style="-fx-text-fill: -color-primary;"/>
+                <Label fx:id="lblCompletedCount" text="--" styleClass="stat-value" style="-fx-text-fill: -color-available-border;"/>
                 <Label text="Successfully checked out" styleClass="text-muted"/>
             </VBox>
             <VBox HBox.hgrow="ALWAYS" styleClass="stat-card">
@@ -28,11 +28,36 @@
                 <Label text="Grace period auto-releases" styleClass="text-muted"/>
             </VBox>
             <VBox HBox.hgrow="ALWAYS" styleClass="stat-card">
-                <Label text="ESTIMATED PEAK TRAFFIC" styleClass="stat-label"/>
-                <Label text="11 AM - 02 PM" styleClass="stat-value" style="-fx-font-size: 20px; -fx-text-fill: -color-reserved-border;"/>
-                <Label text="Busiest study window" styleClass="text-muted"/>
+                <Label text="ACTIVE FLOORS" styleClass="stat-label"/>
+                <Label fx:id="lblActiveFloorsCount" text="--" styleClass="stat-value" style="-fx-text-fill: -color-primary-text;"/>
+                <Label text="20 seats per floor section" styleClass="text-muted"/>
             </VBox>
         </HBox>
+
+        <!-- Floor-Wise Occupancy Report Table -->
+        <VBox spacing="10" styleClass="card">
+            <HBox alignment="CENTER_LEFT">
+                <VBox spacing="2">
+                    <Label text="Floor-Wise Occupancy Report" styleClass="text-heading"/>
+                    <Label text="Live seat utilization across every library floor section" styleClass="text-muted"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Refresh Report" onAction="#loadReportData" styleClass="btn-secondary" style="-fx-font-size: 11px;"/>
+            </HBox>
+
+            <TableView fx:id="tblFloorReport" prefHeight="190" styleClass="table-view">
+                <columns>
+                    <TableColumn fx:id="colRepFloorNum" text="Floor #" prefWidth="80"/>
+                    <TableColumn fx:id="colRepFloorName" text="Floor Section" prefWidth="240"/>
+                    <TableColumn fx:id="colRepTotal" text="Total" prefWidth="80"/>
+                    <TableColumn fx:id="colRepAvail" text="Available" prefWidth="95"/>
+                    <TableColumn fx:id="colRepRes" text="Reserved" prefWidth="95"/>
+                    <TableColumn fx:id="colRepOcc" text="Occupied" prefWidth="95"/>
+                    <TableColumn fx:id="colRepMaint" text="Maintenance" prefWidth="105"/>
+                    <TableColumn fx:id="colRepUtil" text="Utilization %" prefWidth="110"/>
+                </columns>
+            </TableView>
+        </VBox>
 
         <!-- Export Toolbar Card -->
         <HBox spacing="16" alignment="CENTER_LEFT" styleClass="card" style="-fx-padding: 16 22;">
@@ -49,22 +74,20 @@
             <HBox alignment="CENTER_LEFT">
                 <VBox spacing="2">
                     <Label text="Live System Audit Logs" styleClass="text-heading"/>
-                    <Label text="Tracks authentication, reservations, cancellations, and no-show releases" styleClass="text-muted"/>
+                    <Label text="Tracks floor creation, reservations, seat status changes, and no-show releases" styleClass="text-muted"/>
                 </VBox>
-                <Region HBox.hgrow="ALWAYS"/>
-                <Button text="Refresh Logs" onAction="#loadReportData" styleClass="btn-secondary" style="-fx-font-size: 11px;"/>
             </HBox>
 
-            <TableView fx:id="tblActivityLogs" prefHeight="280" styleClass="table-view">
+            <TableView fx:id="tblActivityLogs" prefHeight="250" styleClass="table-view">
                 <columns>
                     <TableColumn fx:id="colLogId" text="ID" prefWidth="60"/>
                     <TableColumn fx:id="colLogUser" text="User" prefWidth="120"/>
-                    <TableColumn fx:id="colLogAction" text="Action Code" prefWidth="180"/>
-                    <TableColumn fx:id="colLogDetails" text="Event Description" prefWidth="380"/>
+                    <TableColumn fx:id="colLogAction" text="Action Event" prefWidth="170"/>
+                    <TableColumn fx:id="colLogDetails" text="Description" prefWidth="390"/>
                     <TableColumn fx:id="colLogTime" text="Timestamp" prefWidth="160"/>
                 </columns>
                 <placeholder>
-                    <Label text="No activity logs recorded." styleClass="text-muted"/>
+                    <Label text="No audit logs found." styleClass="text-muted"/>
                 </placeholder>
             </TableView>
         </VBox>

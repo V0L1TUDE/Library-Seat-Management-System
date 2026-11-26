@@ -26,7 +26,7 @@ public class MyBookingsController {
     @FXML private TableView<Booking> tblBookings;
     @FXML private TableColumn<Booking, String> colId;
     @FXML private TableColumn<Booking, String> colSeat;
-    @FXML private TableColumn<Booking, String> colZone;
+    @FXML private TableColumn<Booking, String> colFloor;
     @FXML private TableColumn<Booking, String> colDate;
     @FXML private TableColumn<Booking, String> colTime;
     @FXML private TableColumn<Booking, String> colStatus;
@@ -56,7 +56,7 @@ public class MyBookingsController {
     private void setupTableColumns() {
         colId.setCellValueFactory(d -> new SimpleStringProperty("#" + d.getValue().getId()));
         colSeat.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getSeatNumber()));
-        colZone.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getZoneName()));
+        colFloor.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getFloorName()));
         colDate.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getBookingDate().toString()));
         colTime.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getFormattedTimeSlot()));
         colStatus.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getStatus().getDisplayName()));

@@ -5,8 +5,8 @@ import com.library.seatmgmt.exception.BookingConflictException;
 import com.library.seatmgmt.model.Booking;
 import com.library.seatmgmt.model.Seat;
 import com.library.seatmgmt.model.User;
-import com.library.seatmgmt.model.Zone;
 import com.library.seatmgmt.model.enums.BookingStatus;
+import com.library.seatmgmt.model.enums.SeatStatus;
 import com.library.seatmgmt.util.DBConnection;
 import com.library.seatmgmt.util.LoggerUtil;
 
@@ -18,9 +18,18 @@ import java.time.LocalTime;
 import java.util.*;
 
 /**
- * JDBC Implementation of BookingDAO with transaction control and In-Memory offline fallback.
+ * JDBC Implementation of BookingDAO with transaction control against MySQL
+ * (floor-wise seats & bookings tables) and In-Memory offline fallback.
  */
 public class BookingDAOImpl implements BookingDAO {
+
+    private static final String BASE_SELECT =
+            "SELECT b.*, u.full_name AS student_name, u.student_id_number, " +
+            "s.seat_number, s.floor_id, f.floor_name, f.floor_number " +
+            "FROM bookings b " +
+            "JOIN users u ON b.student_id = u.id " +
+            "JOIN seats s ON b.seat_id = s.seat_id " +
+            "JOIN floors f ON s.floor_id = f.floor_id ";
 
     @Override
     public Optional<Booking> findById(int id) {
@@ -28,13 +37,7 @@ public class BookingDAOImpl implements BookingDAO {
             return Optional.ofNullable(InMemoryDataStore.getInstance().bookings.get(id));
         }
 
-        String sql = "SELECT b.*, u.full_name AS student_name, u.student_id_number, " +
-                     "s.seat_number, z.name AS zone_name " +
-                     "FROM bookings b " +
-                     "JOIN users u ON b.user_id = u.id " +
-                     "JOIN seats s ON b.seat_id = s.id " +
-                     "JOIN zones z ON s.zone_id = z.id " +
-                     "WHERE b.id = ?";
+        String sql = BASE_SELECT + "WHERE b.booking_id = ?";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -45,6 +48,7 @@ public class BookingDAOImpl implements BookingDAO {
                 }
             }
         } catch (SQLException e) {
+            LoggerUtil.warning("MySQL query failed in BookingDAOImpl.findById: " + e.getMessage());
             return Optional.ofNullable(InMemoryDataStore.getInstance().bookings.get(id));
         }
         return Optional.empty();
@@ -55,19 +59,13 @@ public class BookingDAOImpl implements BookingDAO {
         if (!DBConnection.getInstance().isAvailable()) {
             return InMemoryDataStore.getInstance().bookings.values().stream()
                     .filter(b -> b.getUserId() == userId)
-                    .sorted((a, b) -> b.getBookingDate().compareTo(a.getBookingDate()))
+                    .sorted(Comparator.comparing(Booking::getBookingDate).reversed()
+                            .thenComparing(Booking::getStartTime, Comparator.reverseOrder()))
                     .toList();
         }
 
         List<Booking> list = new ArrayList<>();
-        String sql = "SELECT b.*, u.full_name AS student_name, u.student_id_number, " +
-                     "s.seat_number, z.name AS zone_name " +
-                     "FROM bookings b " +
-                     "JOIN users u ON b.user_id = u.id " +
-                     "JOIN seats s ON b.seat_id = s.id " +
-                     "JOIN zones z ON s.zone_id = z.id " +
-                     "WHERE b.user_id = ? " +
-                     "ORDER BY b.booking_date DESC, b.start_time DESC";
+        String sql = BASE_SELECT + "WHERE b.student_id = ? ORDER BY b.booking_date DESC, b.start_time DESC";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -95,13 +93,7 @@ public class BookingDAOImpl implements BookingDAO {
         }
 
         List<Booking> list = new ArrayList<>();
-        String sql = "SELECT b.*, u.full_name AS student_name, u.student_id_number, " +
-                     "s.seat_number, z.name AS zone_name " +
-                     "FROM bookings b " +
-                     "JOIN users u ON b.user_id = u.id " +
-                     "JOIN seats s ON b.seat_id = s.id " +
-                     "JOIN zones z ON s.zone_id = z.id " +
-                     "WHERE b.user_id = ? AND b.status IN ('RESERVED', 'OCCUPIED') " +
+        String sql = BASE_SELECT + "WHERE b.student_id = ? AND b.booking_status IN ('RESERVED', 'OCCUPIED') " +
                      "ORDER BY b.booking_date ASC, b.start_time ASC";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -121,31 +113,26 @@ public class BookingDAOImpl implements BookingDAO {
     }
 
     @Override
-    public List<Booking> findByDateAndZone(LocalDate date, int zoneId) {
+    public List<Booking> findByDateAndFloor(LocalDate date, int floorId) {
         if (!DBConnection.getInstance().isAvailable()) {
             return InMemoryDataStore.getInstance().bookings.values().stream()
                     .filter(b -> Objects.equals(b.getBookingDate(), date) && b.getStatus().isActive())
                     .filter(b -> {
                         Seat s = InMemoryDataStore.getInstance().seats.get(b.getSeatId());
-                        return s != null && s.getZoneId() == zoneId;
+                        return s != null && s.getFloorId() == floorId;
                     })
                     .toList();
         }
 
         List<Booking> list = new ArrayList<>();
-        String sql = "SELECT b.*, u.full_name AS student_name, u.student_id_number, " +
-                     "s.seat_number, z.name AS zone_name " +
-                     "FROM bookings b " +
-                     "JOIN users u ON b.user_id = u.id " +
-                     "JOIN seats s ON b.seat_id = s.id " +
-                     "JOIN zones z ON s.zone_id = z.id " +
-                     "WHERE b.booking_date = ? AND s.zone_id = ? AND b.status IN ('RESERVED', 'OCCUPIED') " +
+        String sql = BASE_SELECT +
+                     "WHERE b.booking_date = ? AND s.floor_id = ? AND b.booking_status IN ('RESERVED', 'OCCUPIED') " +
                      "ORDER BY b.start_time ASC";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setDate(1, Date.valueOf(date));
-            ps.setInt(2, zoneId);
+            ps.setInt(2, floorId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     list.add(mapResultSetToBooking(rs));
@@ -156,11 +143,16 @@ public class BookingDAOImpl implements BookingDAO {
                     .filter(b -> Objects.equals(b.getBookingDate(), date) && b.getStatus().isActive())
                     .filter(b -> {
                         Seat s = InMemoryDataStore.getInstance().seats.get(b.getSeatId());
-                        return s != null && s.getZoneId() == zoneId;
+                        return s != null && s.getFloorId() == floorId;
                     })
                     .toList();
         }
         return list;
+    }
+
+    @Override
+    public List<Booking> findByDateAndZone(LocalDate date, int zoneId) {
+        return findByDateAndFloor(date, zoneId);
     }
 
     @Override
@@ -172,14 +164,9 @@ public class BookingDAOImpl implements BookingDAO {
         }
 
         List<Booking> list = new ArrayList<>();
-        String sql = "SELECT b.*, u.full_name AS student_name, u.student_id_number, " +
-                     "s.seat_number, z.name AS zone_name " +
-                     "FROM bookings b " +
-                     "JOIN users u ON b.user_id = u.id " +
-                     "JOIN seats s ON b.seat_id = s.id " +
-                     "JOIN zones z ON s.zone_id = z.id " +
+        String sql = BASE_SELECT +
                      "WHERE b.seat_id = ? AND b.booking_date = ? " +
-                     "AND b.status IN ('RESERVED', 'OCCUPIED') " +
+                     "AND b.booking_status IN ('RESERVED', 'OCCUPIED') " +
                      "AND b.start_time < ? AND b.end_time > ?";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -207,11 +194,14 @@ public class BookingDAOImpl implements BookingDAO {
         if (!DBConnection.getInstance().isAvailable()) {
             InMemoryDataStore store = InMemoryDataStore.getInstance();
             synchronized (store) {
-                // Check in-memory overlap atomically
+                Seat s = store.seats.get(booking.getSeatId());
+                if (s == null || s.getStatus() == SeatStatus.MAINTENANCE) {
+                    throw new BookingConflictException("This seat is currently under maintenance and cannot be reserved.");
+                }
+
                 boolean seatConflict = store.bookings.values().stream()
                         .anyMatch(b -> b.getSeatId() == booking.getSeatId() &&
                                 b.isOverlappingWith(booking.getBookingDate(), booking.getStartTime(), booking.getEndTime()));
-
                 if (seatConflict) {
                     throw new BookingConflictException("The selected seat has already been reserved for this time slot.");
                 }
@@ -219,18 +209,15 @@ public class BookingDAOImpl implements BookingDAO {
                 boolean userConflict = store.bookings.values().stream()
                         .anyMatch(b -> b.getUserId() == booking.getUserId() &&
                                 b.isOverlappingWith(booking.getBookingDate(), booking.getStartTime(), booking.getEndTime()));
-
                 if (userConflict) {
                     throw new BookingConflictException("You already hold an active reservation during this time slot.");
                 }
 
                 booking.setId(store.nextBookingId());
-
-                Seat s = store.seats.get(booking.getSeatId());
-                if (s != null) {
-                    booking.setSeatNumber(s.getSeatNumber());
-                    booking.setZoneName(s.getZoneName());
-                }
+                booking.setSeatNumber(s.getSeatNumber());
+                booking.setFloorId(s.getFloorId());
+                booking.setFloorName(s.getFloorName());
+                booking.setFloorNumber(s.getFloorNumber());
 
                 User u = store.users.get(booking.getUserId());
                 if (u != null) {
@@ -250,11 +237,33 @@ public class BookingDAOImpl implements BookingDAO {
             conn = DBConnection.getInstance().getConnection();
             conn.setAutoCommit(false);
 
+            // 1. Lock seat row and verify operational status (cannot book MAINTENANCE seats)
+            String seatStatusSql = "SELECT s.seat_status, s.seat_number, s.floor_id, f.floor_name, f.floor_number " +
+                                   "FROM seats s JOIN floors f ON s.floor_id = f.floor_id " +
+                                   "WHERE s.seat_id = ? FOR UPDATE";
+            try (PreparedStatement seatPs = conn.prepareStatement(seatStatusSql)) {
+                seatPs.setInt(1, booking.getSeatId());
+                try (ResultSet rs = seatPs.executeQuery()) {
+                    if (!rs.next()) {
+                        conn.rollback();
+                        throw new BookingConflictException("The selected seat does not exist.");
+                    }
+                    if (!"AVAILABLE".equals(rs.getString("seat_status"))) {
+                        conn.rollback();
+                        throw new BookingConflictException("Seat " + rs.getString("seat_number") + " is currently under maintenance.");
+                    }
+                    booking.setSeatNumber(rs.getString("seat_number"));
+                    booking.setFloorId(rs.getInt("floor_id"));
+                    booking.setFloorName(rs.getString("floor_name"));
+                    booking.setFloorNumber(rs.getInt("floor_number"));
+                }
+            }
+
+            // 2. Check overlapping booking on the same seat
             String seatConflictSql = "SELECT COUNT(*) FROM bookings " +
                     "WHERE seat_id = ? AND booking_date = ? " +
-                    "AND status IN ('RESERVED', 'OCCUPIED') " +
+                    "AND booking_status IN ('RESERVED', 'OCCUPIED') " +
                     "AND start_time < ? AND end_time > ? FOR UPDATE";
-
             try (PreparedStatement checkPs = conn.prepareStatement(seatConflictSql)) {
                 checkPs.setInt(1, booking.getSeatId());
                 checkPs.setDate(2, Date.valueOf(booking.getBookingDate()));
@@ -264,16 +273,16 @@ public class BookingDAOImpl implements BookingDAO {
                 try (ResultSet rs = checkPs.executeQuery()) {
                     if (rs.next() && rs.getInt(1) > 0) {
                         conn.rollback();
-                        throw new BookingConflictException("The selected seat has already been reserved for this time slot.");
+                        throw new BookingConflictException("The selected seat has already been reserved or occupied for this time slot.");
                     }
                 }
             }
 
+            // 3. Check student overlap across all floors
             String userConflictSql = "SELECT COUNT(*) FROM bookings " +
-                    "WHERE user_id = ? AND booking_date = ? " +
-                    "AND status IN ('RESERVED', 'OCCUPIED') " +
+                    "WHERE student_id = ? AND booking_date = ? " +
+                    "AND booking_status IN ('RESERVED', 'OCCUPIED') " +
                     "AND start_time < ? AND end_time > ?";
-
             try (PreparedStatement userPs = conn.prepareStatement(userConflictSql)) {
                 userPs.setInt(1, booking.getUserId());
                 userPs.setDate(2, Date.valueOf(booking.getBookingDate()));
@@ -288,7 +297,8 @@ public class BookingDAOImpl implements BookingDAO {
                 }
             }
 
-            String insertSql = "INSERT INTO bookings (user_id, seat_id, booking_date, start_time, end_time, status) " +
+            // 4. Insert booking record
+            String insertSql = "INSERT INTO bookings (student_id, seat_id, booking_date, start_time, end_time, booking_status) " +
                                "VALUES (?, ?, ?, ?, ?, ?)";
             try (PreparedStatement insertPs = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
                 insertPs.setInt(1, booking.getUserId());
@@ -339,7 +349,7 @@ public class BookingDAOImpl implements BookingDAO {
             return false;
         }
 
-        String sql = "UPDATE bookings SET status = ? WHERE id = ?";
+        String sql = "UPDATE bookings SET booking_status = ? WHERE booking_id = ?";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -347,11 +357,7 @@ public class BookingDAOImpl implements BookingDAO {
             ps.setInt(2, bookingId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            Booking b = InMemoryDataStore.getInstance().bookings.get(bookingId);
-            if (b != null) {
-                b.setStatus(status);
-                return true;
-            }
+            LoggerUtil.warning("Failed to update booking status in MySQL: " + e.getMessage());
             return false;
         }
     }
@@ -368,7 +374,7 @@ public class BookingDAOImpl implements BookingDAO {
             return false;
         }
 
-        String sql = "UPDATE bookings SET status = 'OCCUPIED', check_in_time = ? WHERE id = ?";
+        String sql = "UPDATE bookings SET booking_status = 'OCCUPIED', check_in_time = ? WHERE booking_id = ?";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -376,12 +382,7 @@ public class BookingDAOImpl implements BookingDAO {
             ps.setInt(2, bookingId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            Booking b = InMemoryDataStore.getInstance().bookings.get(bookingId);
-            if (b != null) {
-                b.setStatus(BookingStatus.OCCUPIED);
-                b.setCheckInTime(checkInTime);
-                return true;
-            }
+            LoggerUtil.warning("Failed to check in booking in MySQL: " + e.getMessage());
             return false;
         }
     }
@@ -398,7 +399,7 @@ public class BookingDAOImpl implements BookingDAO {
             return false;
         }
 
-        String sql = "UPDATE bookings SET status = 'COMPLETED', check_out_time = ? WHERE id = ?";
+        String sql = "UPDATE bookings SET booking_status = 'COMPLETED', check_out_time = ? WHERE booking_id = ?";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -406,12 +407,7 @@ public class BookingDAOImpl implements BookingDAO {
             ps.setInt(2, bookingId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            Booking b = InMemoryDataStore.getInstance().bookings.get(bookingId);
-            if (b != null) {
-                b.setStatus(BookingStatus.COMPLETED);
-                b.setCheckOutTime(checkOutTime);
-                return true;
-            }
+            LoggerUtil.warning("Failed to check out booking in MySQL: " + e.getMessage());
             return false;
         }
     }
@@ -425,13 +421,8 @@ public class BookingDAOImpl implements BookingDAO {
         }
 
         List<Booking> list = new ArrayList<>();
-        String sql = "SELECT b.*, u.full_name AS student_name, u.student_id_number, " +
-                     "s.seat_number, z.name AS zone_name " +
-                     "FROM bookings b " +
-                     "JOIN users u ON b.user_id = u.id " +
-                     "JOIN seats s ON b.seat_id = s.id " +
-                     "JOIN zones z ON s.zone_id = z.id " +
-                     "WHERE b.status = 'RESERVED' " +
+        String sql = BASE_SELECT +
+                     "WHERE b.booking_status = 'RESERVED' " +
                      "AND (b.booking_date < ? OR (b.booking_date = ? AND b.start_time <= ?))";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -464,13 +455,7 @@ public class BookingDAOImpl implements BookingDAO {
         }
 
         List<Booking> list = new ArrayList<>();
-        String sql = "SELECT b.*, u.full_name AS student_name, u.student_id_number, " +
-                     "s.seat_number, z.name AS zone_name " +
-                     "FROM bookings b " +
-                     "JOIN users u ON b.user_id = u.id " +
-                     "JOIN seats s ON b.seat_id = s.id " +
-                     "JOIN zones z ON s.zone_id = z.id " +
-                     "ORDER BY b.created_at DESC LIMIT ?";
+        String sql = BASE_SELECT + "ORDER BY b.created_at DESC, b.booking_id DESC LIMIT ?";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -489,13 +474,44 @@ public class BookingDAOImpl implements BookingDAO {
     }
 
     @Override
+    public List<Booking> findAllRecentByFloor(int floorId, int limit) {
+        if (!DBConnection.getInstance().isAvailable()) {
+            return InMemoryDataStore.getInstance().bookings.values().stream()
+                    .filter(b -> b.getFloorId() == floorId)
+                    .sorted((a, b) -> Integer.compare(b.getId(), a.getId()))
+                    .limit(limit)
+                    .toList();
+        }
+
+        List<Booking> list = new ArrayList<>();
+        String sql = BASE_SELECT + "WHERE s.floor_id = ? ORDER BY b.created_at DESC, b.booking_id DESC LIMIT ?";
+        try (Connection conn = DBConnection.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, floorId);
+            ps.setInt(2, limit);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSetToBooking(rs));
+                }
+            }
+        } catch (SQLException e) {
+            return InMemoryDataStore.getInstance().bookings.values().stream()
+                    .filter(b -> b.getFloorId() == floorId)
+                    .limit(limit)
+                    .toList();
+        }
+        return list;
+    }
+
+    @Override
     public int countByStatus(BookingStatus status) {
         if (!DBConnection.getInstance().isAvailable()) {
             return (int) InMemoryDataStore.getInstance().bookings.values().stream()
                     .filter(b -> b.getStatus() == status).count();
         }
 
-        String sql = "SELECT COUNT(*) FROM bookings WHERE status = ?";
+        String sql = "SELECT COUNT(*) FROM bookings WHERE booking_status = ?";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -543,13 +559,13 @@ public class BookingDAOImpl implements BookingDAO {
         Timestamp updatedTs = rs.getTimestamp("updated_at");
 
         Booking b = new Booking(
-                rs.getInt("id"),
-                rs.getInt("user_id"),
+                rs.getInt("booking_id"),
+                rs.getInt("student_id"),
                 rs.getInt("seat_id"),
                 rs.getDate("booking_date").toLocalDate(),
                 rs.getTime("start_time").toLocalTime(),
                 rs.getTime("end_time").toLocalTime(),
-                BookingStatus.valueOf(rs.getString("status")),
+                BookingStatus.valueOf(rs.getString("booking_status")),
                 checkInTs != null ? checkInTs.toLocalDateTime() : null,
                 checkOutTs != null ? checkOutTs.toLocalDateTime() : null,
                 createdTs != null ? createdTs.toLocalDateTime() : null,
@@ -559,7 +575,9 @@ public class BookingDAOImpl implements BookingDAO {
         b.setStudentName(rs.getString("student_name"));
         b.setStudentIdNumber(rs.getString("student_id_number"));
         b.setSeatNumber(rs.getString("seat_number"));
-        b.setZoneName(rs.getString("zone_name"));
+        b.setFloorId(rs.getInt("floor_id"));
+        b.setFloorName(rs.getString("floor_name"));
+        b.setFloorNumber(rs.getInt("floor_number"));
         return b;
     }
 }

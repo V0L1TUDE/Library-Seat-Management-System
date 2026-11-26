@@ -4,14 +4,16 @@ import com.library.seatmgmt.dao.SeatDAO;
 import com.library.seatmgmt.model.Seat;
 import com.library.seatmgmt.model.enums.SeatStatus;
 import com.library.seatmgmt.util.DBConnection;
+import com.library.seatmgmt.util.LoggerUtil;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
 /**
- * JDBC Implementation of SeatDAO with seamless In-Memory offline fallback.
+ * JDBC Implementation of SeatDAO querying the floor-wise seats table.
  */
 public class SeatDAOImpl implements SeatDAO {
 
@@ -21,10 +23,10 @@ public class SeatDAOImpl implements SeatDAO {
             return Optional.ofNullable(InMemoryDataStore.getInstance().seats.get(id));
         }
 
-        String sql = "SELECT s.*, z.name AS zone_name, z.code AS zone_code " +
+        String sql = "SELECT s.*, f.floor_name, f.floor_number " +
                      "FROM seats s " +
-                     "JOIN zones z ON s.zone_id = z.id " +
-                     "WHERE s.id = ?";
+                     "JOIN floors f ON s.floor_id = f.floor_id " +
+                     "WHERE s.seat_id = ?";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -35,27 +37,28 @@ public class SeatDAOImpl implements SeatDAO {
                 }
             }
         } catch (SQLException e) {
+            LoggerUtil.warning("MySQL query failed in SeatDAOImpl.findById: " + e.getMessage());
             return Optional.ofNullable(InMemoryDataStore.getInstance().seats.get(id));
         }
         return Optional.empty();
     }
 
     @Override
-    public Optional<Seat> findByZoneAndNumber(int zoneId, String seatNumber) {
+    public Optional<Seat> findByFloorAndNumber(int floorId, String seatNumber) {
         if (!DBConnection.getInstance().isAvailable()) {
             return InMemoryDataStore.getInstance().seats.values().stream()
-                    .filter(s -> s.getZoneId() == zoneId && s.getSeatNumber().equalsIgnoreCase(seatNumber))
+                    .filter(s -> s.getFloorId() == floorId && s.getSeatNumber().equalsIgnoreCase(seatNumber))
                     .findFirst();
         }
 
-        String sql = "SELECT s.*, z.name AS zone_name, z.code AS zone_code " +
+        String sql = "SELECT s.*, f.floor_name, f.floor_number " +
                      "FROM seats s " +
-                     "JOIN zones z ON s.zone_id = z.id " +
-                     "WHERE s.zone_id = ? AND s.seat_number = ?";
+                     "JOIN floors f ON s.floor_id = f.floor_id " +
+                     "WHERE s.floor_id = ? AND s.seat_number = ?";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, zoneId);
+            ps.setInt(1, floorId);
             ps.setString(2, seatNumber);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -64,55 +67,69 @@ public class SeatDAOImpl implements SeatDAO {
             }
         } catch (SQLException e) {
             return InMemoryDataStore.getInstance().seats.values().stream()
-                    .filter(s -> s.getZoneId() == zoneId && s.getSeatNumber().equalsIgnoreCase(seatNumber))
+                    .filter(s -> s.getFloorId() == floorId && s.getSeatNumber().equalsIgnoreCase(seatNumber))
                     .findFirst();
         }
         return Optional.empty();
     }
 
     @Override
-    public List<Seat> findByZoneId(int zoneId) {
+    public Optional<Seat> findByZoneAndNumber(int zoneId, String seatNumber) {
+        return findByFloorAndNumber(zoneId, seatNumber);
+    }
+
+    @Override
+    public List<Seat> findByFloorId(int floorId) {
         if (!DBConnection.getInstance().isAvailable()) {
             return InMemoryDataStore.getInstance().seats.values().stream()
-                    .filter(s -> s.getZoneId() == zoneId)
-                    .sorted((a, b) -> a.getSeatNumber().compareTo(b.getSeatNumber()))
+                    .filter(s -> s.getFloorId() == floorId)
+                    .sorted(Comparator.comparing(Seat::getSeatNumber))
                     .toList();
         }
 
         List<Seat> seats = new ArrayList<>();
-        String sql = "SELECT s.*, z.name AS zone_name, z.code AS zone_code " +
+        String sql = "SELECT s.*, f.floor_name, f.floor_number " +
                      "FROM seats s " +
-                     "JOIN zones z ON s.zone_id = z.id " +
-                     "WHERE s.zone_id = ? " +
+                     "JOIN floors f ON s.floor_id = f.floor_id " +
+                     "WHERE s.floor_id = ? " +
                      "ORDER BY s.seat_number ASC";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, zoneId);
+            ps.setInt(1, floorId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     seats.add(mapResultSetToSeat(rs));
                 }
             }
         } catch (SQLException e) {
+            LoggerUtil.warning("MySQL query failed in SeatDAOImpl.findByFloorId: " + e.getMessage());
             return InMemoryDataStore.getInstance().seats.values().stream()
-                    .filter(s -> s.getZoneId() == zoneId)
+                    .filter(s -> s.getFloorId() == floorId)
+                    .sorted(Comparator.comparing(Seat::getSeatNumber))
                     .toList();
         }
         return seats;
     }
 
     @Override
+    public List<Seat> findByZoneId(int zoneId) {
+        return findByFloorId(zoneId);
+    }
+
+    @Override
     public List<Seat> findAll() {
         if (!DBConnection.getInstance().isAvailable()) {
-            return new ArrayList<>(InMemoryDataStore.getInstance().seats.values());
+            return InMemoryDataStore.getInstance().seats.values().stream()
+                    .sorted(Comparator.comparingInt(Seat::getFloorNumber).thenComparing(Seat::getSeatNumber))
+                    .toList();
         }
 
         List<Seat> seats = new ArrayList<>();
-        String sql = "SELECT s.*, z.name AS zone_name, z.code AS zone_code " +
+        String sql = "SELECT s.*, f.floor_name, f.floor_number " +
                      "FROM seats s " +
-                     "JOIN zones z ON s.zone_id = z.id " +
-                     "ORDER BY z.name ASC, s.seat_number ASC";
+                     "JOIN floors f ON s.floor_id = f.floor_id " +
+                     "ORDER BY f.floor_number ASC, s.seat_number ASC";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -121,7 +138,9 @@ public class SeatDAOImpl implements SeatDAO {
                 seats.add(mapResultSetToSeat(rs));
             }
         } catch (SQLException e) {
-            return new ArrayList<>(InMemoryDataStore.getInstance().seats.values());
+            return InMemoryDataStore.getInstance().seats.values().stream()
+                    .sorted(Comparator.comparingInt(Seat::getFloorNumber).thenComparing(Seat::getSeatNumber))
+                    .toList();
         }
         return seats;
     }
@@ -129,22 +148,22 @@ public class SeatDAOImpl implements SeatDAO {
     @Override
     public boolean save(Seat seat) {
         if (!DBConnection.getInstance().isAvailable()) {
-            if (seat.getId() == 0) seat.setId(InMemoryDataStore.getInstance().seats.size() + 1);
+            if (seat.getId() == 0) seat.setId(InMemoryDataStore.getInstance().nextSeatId());
             InMemoryDataStore.getInstance().seats.put(seat.getId(), seat);
             return true;
         }
 
-        String sql = "INSERT INTO seats (zone_id, seat_number, has_power, is_near_window, has_pc, status) " +
+        String sql = "INSERT INTO seats (floor_id, seat_number, seat_status, has_power, is_near_window, has_pc) " +
                      "VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            ps.setInt(1, seat.getZoneId());
+            ps.setInt(1, seat.getFloorId());
             ps.setString(2, seat.getSeatNumber());
-            ps.setBoolean(3, seat.isHasPower());
-            ps.setBoolean(4, seat.isNearWindow());
-            ps.setBoolean(5, seat.isHasPc());
-            ps.setString(6, seat.getStatus().name());
+            ps.setString(3, seat.getStatus().name());
+            ps.setBoolean(4, seat.isHasPower());
+            ps.setBoolean(5, seat.isNearWindow());
+            ps.setBoolean(6, seat.isHasPc());
 
             int affected = ps.executeUpdate();
             if (affected > 0) {
@@ -156,8 +175,8 @@ public class SeatDAOImpl implements SeatDAO {
                 return true;
             }
         } catch (SQLException e) {
-            InMemoryDataStore.getInstance().seats.put(seat.getId(), seat);
-            return true;
+            LoggerUtil.warning("Failed to save seat in MySQL: " + e.getMessage());
+            return false;
         }
         return false;
     }
@@ -169,23 +188,23 @@ public class SeatDAOImpl implements SeatDAO {
             return true;
         }
 
-        String sql = "UPDATE seats SET zone_id = ?, seat_number = ?, has_power = ?, is_near_window = ?, " +
-                     "has_pc = ?, status = ? WHERE id = ?";
+        String sql = "UPDATE seats SET floor_id = ?, seat_number = ?, seat_status = ?, " +
+                     "has_power = ?, is_near_window = ?, has_pc = ? WHERE seat_id = ?";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, seat.getZoneId());
+            ps.setInt(1, seat.getFloorId());
             ps.setString(2, seat.getSeatNumber());
-            ps.setBoolean(3, seat.isHasPower());
-            ps.setBoolean(4, seat.isNearWindow());
-            ps.setBoolean(5, seat.isHasPc());
-            ps.setString(6, seat.getStatus().name());
+            ps.setString(3, seat.getStatus().name());
+            ps.setBoolean(4, seat.isHasPower());
+            ps.setBoolean(5, seat.isNearWindow());
+            ps.setBoolean(6, seat.isHasPc());
             ps.setInt(7, seat.getId());
 
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            InMemoryDataStore.getInstance().seats.put(seat.getId(), seat);
-            return true;
+            LoggerUtil.warning("Failed to update seat in MySQL: " + e.getMessage());
+            return false;
         }
     }
 
@@ -200,7 +219,7 @@ public class SeatDAOImpl implements SeatDAO {
             return false;
         }
 
-        String sql = "UPDATE seats SET status = ? WHERE id = ?";
+        String sql = "UPDATE seats SET seat_status = ? WHERE seat_id = ?";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -208,11 +227,7 @@ public class SeatDAOImpl implements SeatDAO {
             ps.setInt(2, seatId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            Seat s = InMemoryDataStore.getInstance().seats.get(seatId);
-            if (s != null) {
-                s.setStatus(status);
-                return true;
-            }
+            LoggerUtil.warning("Failed to update seat status in MySQL: " + e.getMessage());
             return false;
         }
     }
@@ -244,7 +259,7 @@ public class SeatDAOImpl implements SeatDAO {
                     .filter(s -> s.getStatus() == status).count();
         }
 
-        String sql = "SELECT COUNT(*) FROM seats WHERE status = ?";
+        String sql = "SELECT COUNT(*) FROM seats WHERE seat_status = ?";
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -264,17 +279,17 @@ public class SeatDAOImpl implements SeatDAO {
     private Seat mapResultSetToSeat(ResultSet rs) throws SQLException {
         Timestamp ts = rs.getTimestamp("created_at");
         Seat seat = new Seat(
-                rs.getInt("id"),
-                rs.getInt("zone_id"),
+                rs.getInt("seat_id"),
+                rs.getInt("floor_id"),
                 rs.getString("seat_number"),
                 rs.getBoolean("has_power"),
                 rs.getBoolean("is_near_window"),
                 rs.getBoolean("has_pc"),
-                SeatStatus.valueOf(rs.getString("status")),
+                SeatStatus.valueOf(rs.getString("seat_status")),
                 ts != null ? ts.toLocalDateTime() : null
         );
-        seat.setZoneName(rs.getString("zone_name"));
-        seat.setZoneCode(rs.getString("zone_code"));
+        seat.setFloorName(rs.getString("floor_name"));
+        seat.setFloorNumber(rs.getInt("floor_number"));
         return seat;
     }
 }

@@ -36,7 +36,7 @@ public final class DBConnection {
                 LoggerUtil.warning("Could not find configuration file: " + PROPERTIES_FILE + ". Using defaults.");
                 this.url = "jdbc:mysql://localhost:3306/library_seat_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
                 this.username = "root";
-                this.password = "root";
+                this.password = "Pubg2arjan";
                 this.driver = "com.mysql.cj.jdbc.Driver";
                 this.timeout = 3;
                 return;

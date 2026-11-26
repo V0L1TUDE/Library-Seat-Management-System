@@ -6,13 +6,13 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.library.seatmgmt.controller.MainController"
-            prefWidth="1180" prefHeight="740" styleClass="root">
+            prefWidth="1220" prefHeight="760" styleClass="root">
 
-    <!-- Left Sidebar -->
+    <!-- Left Sidebar (Deep Maroon/Crimson) -->
     <left>
-        <VBox prefWidth="240" styleClass="sidebar" spacing="6">
+        <VBox prefWidth="244" styleClass="sidebar" spacing="6">
             <!-- Branding Header -->
-            <VBox spacing="4" style="-fx-padding: 0 0 16 0; -fx-border-color: #233A30; -fx-border-width: 0 0 1 0;">
+            <VBox spacing="4" style="-fx-padding: 0 0 16 0; -fx-border-color: #7F1D1D; -fx-border-width: 0 0 1 0;">
                 <HBox alignment="CENTER_LEFT" spacing="10">
                     <Label text="🏛️" style="-fx-font-size: 22px;"/>
                     <VBox>
@@ -22,21 +22,21 @@
                 </HBox>
             </VBox>
 
-            <Label text="NAVIGATION" style="-fx-font-size: 10px; -fx-text-fill: #748A7D; -fx-font-weight: bold; -fx-padding: 10 0 4 8;"/>
+            <Label text="NAVIGATION" style="-fx-font-size: 10px; -fx-text-fill: #FCA5A5; -fx-font-weight: bold; -fx-padding: 10 0 4 8;"/>
 
             <!-- Navigation Buttons -->
             <Button fx:id="btnNavDashboard" text="📊  Dashboard" onAction="#showDashboard" maxWidth="Infinity" styleClass="nav-button"/>
-            <Button fx:id="btnNavSeatMap" text="🪑  Find a Seat" onAction="#showSeatMap" maxWidth="Infinity" styleClass="nav-button"/>
+            <Button fx:id="btnNavSeatMap" text="🪑  Floor Seat Map" onAction="#showSeatMap" maxWidth="Infinity" styleClass="nav-button"/>
             <Button fx:id="btnNavMyBookings" text="📅  My Bookings" onAction="#showMyBookings" maxWidth="Infinity" styleClass="nav-button"/>
             <Button fx:id="btnNavReports" text="📈  Reports &amp; Analytics" onAction="#showReports" maxWidth="Infinity" styleClass="nav-button"/>
-            <Button fx:id="btnNavAdmin" text="⚙️  Admin Management" onAction="#showAdminView" maxWidth="Infinity" styleClass="nav-button"/>
+            <Button fx:id="btnNavAdmin" text="⚙️  Floor &amp; Seat Admin" onAction="#showAdminView" maxWidth="Infinity" styleClass="nav-button"/>
 
             <Region VBox.vgrow="ALWAYS"/>
 
             <!-- Bottom Utilities -->
-            <VBox spacing="8" style="-fx-border-color: #233A30; -fx-border-width: 1 0 0 0; -fx-padding: 14 0 0 0;">
+            <VBox spacing="8" style="-fx-border-color: #7F1D1D; -fx-border-width: 1 0 0 0; -fx-padding: 14 0 0 0;">
                 <Button fx:id="btnThemeToggle" text="🌙  Dark Mode" onAction="#toggleTheme" maxWidth="Infinity" styleClass="nav-button"/>
-                <Button text="🚪  Log Out" onAction="#handleLogout" maxWidth="Infinity" styleClass="nav-button" style="-fx-text-fill: #FCA5A5;"/>
+                <Button text="🚪  Log Out" onAction="#handleLogout" maxWidth="Infinity" styleClass="nav-button" style="-fx-text-fill: #FECACA;"/>
             </VBox>
         </VBox>
     </left>
@@ -48,7 +48,7 @@
             <HBox styleClass="topbar" spacing="16" alignment="CENTER_LEFT">
                 <VBox spacing="2">
                     <Label fx:id="lblPageTitle" text="Student Dashboard" styleClass="text-heading"/>
-                    <Label fx:id="lblPageSubtitle" text="Library availability and current reservations" styleClass="text-muted"/>
+                    <Label fx:id="lblPageSubtitle" text="Library floor availability and current reservations" styleClass="text-muted"/>
                 </VBox>
 
                 <Region HBox.hgrow="ALWAYS"/>
