@@ -121,13 +121,13 @@ DELIMITER ;
 -- SEED DATA FOR TESTING AND EVALUATION
 -- ============================================================
 
--- Passwords below are SHA-256 for 'password123':
--- ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f
+-- Passwords below are salted SHA-256 ('password123' + 'LMS_SECRET_SALT_2024'):
+-- 8681faffa94ded79aae8812af199a8c2311441d8d4ea18da868b88651de0c5d0
 
 INSERT IGNORE INTO users (username, password_hash, full_name, email, role, student_id_number, department, phone) VALUES
-('admin', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'Dr. Sarah Jenkins', 'admin@library.edu', 'ADMIN', NULL, 'Library Administration', '555-0100'),
-('student1', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'Alex Rivera', 'alex@student.edu', 'STUDENT', 'STU-2024-001', 'Computer Science', '555-0101'),
-('student2', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'Emily Chen', 'emily@student.edu', 'STUDENT', 'STU-2024-002', 'Electrical Engineering', '555-0102');
+('admin', '8681faffa94ded79aae8812af199a8c2311441d8d4ea18da868b88651de0c5d0', 'Dr. Sarah Jenkins', 'admin@library.edu', 'ADMIN', NULL, 'Library Administration', '555-0100'),
+('student1', '8681faffa94ded79aae8812af199a8c2311441d8d4ea18da868b88651de0c5d0', 'Alex Rivera', 'alex@student.edu', 'STUDENT', 'STU-2024-001', 'Computer Science', '555-0101'),
+('student2', '8681faffa94ded79aae8812af199a8c2311441d8d4ea18da868b88651de0c5d0', 'Emily Chen', 'emily@student.edu', 'STUDENT', 'STU-2024-002', 'Electrical Engineering', '555-0102');
 
 -- Insert 4 Floors (Trigger automatically creates 20 seats per floor = 80 seats total)
 INSERT IGNORE INTO floors (floor_name, floor_number, description) VALUES

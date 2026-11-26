@@ -12,7 +12,9 @@ import com.library.seatmgmt.exception.SeatUnavailableException;
 import com.library.seatmgmt.model.Booking;
 import com.library.seatmgmt.model.Floor;
 import com.library.seatmgmt.model.Seat;
+import com.library.seatmgmt.model.User;
 import com.library.seatmgmt.model.enums.SeatStatus;
+import com.library.seatmgmt.service.AuthService;
 import com.library.seatmgmt.service.BookingService;
 import com.library.seatmgmt.service.SeatService;
 import com.library.seatmgmt.util.DBConnection;
@@ -50,6 +52,14 @@ public class FloorAndDatabaseTest {
             assertEquals(20, floorSeats.size(),
                     "Each floor must contain exactly 20 seats: " + f.getFloorName());
         }
+
+        // Verify live MySQL login works with default evaluation credentials
+        AuthService authService = new AuthService();
+        User student = assertDoesNotThrow(() -> authService.login("student1", "password123"));
+        assertTrue(student.isStudent());
+        User admin = assertDoesNotThrow(() -> authService.login("admin", "password123"));
+        assertTrue(admin.isAdmin());
+        authService.logout();
     }
 
     @Test
