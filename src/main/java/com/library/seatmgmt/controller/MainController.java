@@ -7,7 +7,6 @@ import com.library.seatmgmt.util.LoggerUtil;
 import com.library.seatmgmt.util.SessionContext;
 import com.library.seatmgmt.util.ThemeManager;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -21,6 +20,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 /**
  * Main Controller orchestrating application navigation, sidebar states,
@@ -60,7 +60,7 @@ public class MainController {
         }
 
         // Format today's date
-        lblCurrentDate.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy")));
+        lblCurrentDate.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy", Locale.US)));
 
         // Update Theme Button label
         updateThemeButtonLabel();
@@ -105,7 +105,7 @@ public class MainController {
     public void showAdminView() {
         setActiveNav(btnNavAdmin);
         lblPageTitle.setText("Administrative Seat Control");
-        lblPageSubtitle.setText("Manage zones, toggle maintenance, and inspect live capacity");
+        lblPageSubtitle.setText("Manage zones, monitor bookings, and inspect live capacity");
         loadView("/fxml/admin_dashboard.fxml");
     }
 

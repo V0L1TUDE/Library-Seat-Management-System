@@ -13,7 +13,6 @@ import com.library.seatmgmt.model.ActivityLog;
 import com.library.seatmgmt.model.Booking;
 import com.library.seatmgmt.model.Seat;
 import com.library.seatmgmt.model.enums.BookingStatus;
-import com.library.seatmgmt.model.enums.SeatStatus;
 import com.library.seatmgmt.util.LoggerUtil;
 import com.library.seatmgmt.util.ValidationUtil;
 

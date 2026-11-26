@@ -11,7 +11,6 @@ import com.library.seatmgmt.util.FileUtil;
 import com.library.seatmgmt.util.LoggerUtil;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 

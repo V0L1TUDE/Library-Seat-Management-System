@@ -1,7 +1,5 @@
 package com.library.seatmgmt.controller;
 
-import com.library.seatmgmt.dao.SeatDAO;
-import com.library.seatmgmt.dao.impl.SeatDAOImpl;
 import com.library.seatmgmt.exception.BookingConflictException;
 import com.library.seatmgmt.exception.InvalidBookingException;
 import com.library.seatmgmt.exception.SeatUnavailableException;
@@ -9,15 +7,12 @@ import com.library.seatmgmt.model.Booking;
 import com.library.seatmgmt.model.Seat;
 import com.library.seatmgmt.model.User;
 import com.library.seatmgmt.model.Zone;
-import com.library.seatmgmt.model.enums.SeatStatus;
 import com.library.seatmgmt.service.BookingService;
 import com.library.seatmgmt.service.RecommendationService;
 import com.library.seatmgmt.service.SeatService;
 import com.library.seatmgmt.util.LoggerUtil;
 import com.library.seatmgmt.util.SessionContext;
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -28,7 +23,9 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Controller for the Interactive Seat Map.
@@ -63,10 +60,10 @@ public class SeatMapController {
     private final SeatService seatService = new SeatService();
     private final BookingService bookingService = new BookingService();
     private final RecommendationService recommendationService = new RecommendationService();
-    private final SeatDAO seatDAO = new SeatDAOImpl();
 
     private Seat selectedSeat = null;
     private VBox selectedTile = null;
+    private final Map<Integer, VBox> seatTileMap = new HashMap<>();
 
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("hh:mm a", java.util.Locale.US);
 
@@ -86,13 +83,29 @@ public class SeatMapController {
         cmbStartTime.setItems(FXCollections.observableArrayList(times));
         cmbEndTime.setItems(FXCollections.observableArrayList(times));
 
-        // Set sensible defaults: 10:00 AM to 12:00 PM
-        cmbStartTime.setValue("10:00 AM");
-        cmbEndTime.setValue("12:00 PM");
+        // Pick a valid upcoming 2-hour default slot so immediate bookings never fail "in the past" validation
+        LocalTime now = LocalTime.now();
+        if (now.isBefore(LocalTime.of(9, 55))) {
+            dpDate.setValue(LocalDate.now());
+            cmbStartTime.setValue("10:00 AM");
+            cmbEndTime.setValue("12:00 PM");
+        } else if (now.isBefore(LocalTime.of(19, 0))) {
+            dpDate.setValue(LocalDate.now());
+            int startHour = Math.min(19, now.getHour() + 1);
+            int endHour = Math.min(20, startHour + 2);
+            cmbStartTime.setValue(LocalTime.of(startHour, 0).format(TIME_FMT));
+            cmbEndTime.setValue(LocalTime.of(endHour, 0).format(TIME_FMT));
+        } else {
+            dpDate.setValue(LocalDate.now().plusDays(1));
+            cmbStartTime.setValue("10:00 AM");
+            cmbEndTime.setValue("12:00 PM");
+        }
     }
 
     private void initDateAndZones() {
-        dpDate.setValue(LocalDate.now());
+        if (dpDate.getValue() == null) {
+            dpDate.setValue(LocalDate.now());
+        }
 
         try {
             List<Zone> zones = seatService.getAllActiveZones();
@@ -105,11 +118,15 @@ public class SeatMapController {
         }
 
         cmbZone.setOnAction(e -> handleRefreshGrid());
+        dpDate.setOnAction(e -> handleRefreshGrid());
+        cmbStartTime.setOnAction(e -> handleRefreshGrid());
+        cmbEndTime.setOnAction(e -> handleRefreshGrid());
     }
 
     @FXML
     public void handleRefreshGrid() {
         selectedSeat = null;
+        selectedTile = null;
         updateDrawer();
 
         Zone zone = cmbZone.getValue();
@@ -118,16 +135,18 @@ public class SeatMapController {
         lblZoneHeader.setText(zone.getName());
         lblZoneDescription.setText(zone.getDescription() != null ? zone.getDescription() : "Standard seating area");
 
-        LocalDate date = dpDate.getValue();
+        LocalDate date = dpDate.getValue() != null ? dpDate.getValue() : LocalDate.now();
         LocalTime start = parseTime(cmbStartTime.getValue());
         LocalTime end = parseTime(cmbEndTime.getValue());
 
         seatGridPane.getChildren().clear();
+        seatTileMap.clear();
 
         try {
             List<Seat> seats = seatService.getSeatsByZone(zone.getId());
             for (Seat s : seats) {
                 VBox tile = createSeatTile(s, date, start, end);
+                seatTileMap.put(s.getId(), tile);
                 seatGridPane.getChildren().add(tile);
             }
         } catch (Exception e) {
@@ -191,13 +210,13 @@ public class SeatMapController {
 
             lblSummarySeatNumber.setText(selectedSeat.getSeatNumber());
             lblSummaryZoneName.setText(cmbZone.getValue() != null ? cmbZone.getValue().getName() : "");
-            lblSummaryDate.setText(dpDate.getValue().toString());
+            lblSummaryDate.setText(dpDate.getValue() != null ? dpDate.getValue().toString() : LocalDate.now().toString());
             lblSummaryTime.setText(cmbStartTime.getValue() + " - " + cmbEndTime.getValue());
 
             LocalTime start = parseTime(cmbStartTime.getValue());
             LocalTime end = parseTime(cmbEndTime.getValue());
             long minutes = Duration.between(start, end).toMinutes();
-            lblSummaryDuration.setText((minutes / 60) + " hr " + (minutes % 60) + " min");
+            lblSummaryDuration.setText(minutes > 0 ? (minutes / 60) + " hr " + (minutes % 60) + " min" : "Invalid time range");
 
             lblSummaryFacilities.setText(selectedSeat.getFacilitiesDescription());
         }
@@ -208,7 +227,7 @@ public class SeatMapController {
         Zone zone = cmbZone.getValue();
         if (zone == null) return;
 
-        LocalDate date = dpDate.getValue();
+        LocalDate date = dpDate.getValue() != null ? dpDate.getValue() : LocalDate.now();
         LocalTime start = parseTime(cmbStartTime.getValue());
         LocalTime end = parseTime(cmbEndTime.getValue());
 
@@ -223,14 +242,20 @@ public class SeatMapController {
             alert.showAndWait();
         } else {
             Seat best = recommended.get(0);
+            handleRefreshGrid();
+            VBox bestTile = seatTileMap.get(best.getId());
+            if (bestTile != null) {
+                bestTile.getStyleClass().add("seat-selected");
+                selectedTile = bestTile;
+                selectedSeat = best;
+                updateDrawer();
+            }
+
             Alert alert = new Alert(Alert.AlertType.INFORMATION,
                     "Best matched seat for your preferences: " + best.getSeatNumber() +
                     " (" + best.getFacilitiesDescription() + ")", ButtonType.OK);
             alert.setHeaderText("Smart Recommendation");
             alert.showAndWait();
-
-            // Refresh and select best seat
-            handleRefreshGrid();
         }
     }
 

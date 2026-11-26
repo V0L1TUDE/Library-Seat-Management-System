@@ -65,14 +65,14 @@ public class AdminDashboardController {
             int available = Math.max(0, totalSeats - occupied - reserved);
             int students = userDAO.countTotalStudents();
 
-            lblAdminTotalSeats.setText(String.valueOf(totalSeats > 0 ? totalSeats : 15));
+            lblAdminTotalSeats.setText(String.valueOf(totalSeats));
             lblAdminOccupied.setText(String.valueOf(occupied));
             lblAdminReserved.setText(String.valueOf(reserved));
-            lblAdminTotalStudents.setText(String.valueOf(students > 0 ? students : 2));
+            lblAdminTotalStudents.setText(String.valueOf(students));
 
             // Populate PieChart
             ObservableList<PieChart.Data> pieData = FXCollections.observableArrayList(
-                    new PieChart.Data("Available (" + available + ")", Math.max(1, available)),
+                    new PieChart.Data("Available (" + available + ")", (totalSeats == 0 && occupied == 0 && reserved == 0) ? 1 : available),
                     new PieChart.Data("Reserved (" + reserved + ")", reserved),
                     new PieChart.Data("Occupied (" + occupied + ")", occupied)
             );

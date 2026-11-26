@@ -154,6 +154,10 @@ public class BookingDAOImpl implements BookingDAO {
         } catch (SQLException e) {
             return InMemoryDataStore.getInstance().bookings.values().stream()
                     .filter(b -> Objects.equals(b.getBookingDate(), date) && b.getStatus().isActive())
+                    .filter(b -> {
+                        Seat s = InMemoryDataStore.getInstance().seats.get(b.getSeatId());
+                        return s != null && s.getZoneId() == zoneId;
+                    })
                     .toList();
         }
         return list;
@@ -201,41 +205,44 @@ public class BookingDAOImpl implements BookingDAO {
     @Override
     public boolean saveTransactional(Booking booking) throws BookingConflictException {
         if (!DBConnection.getInstance().isAvailable()) {
-            // Check in-memory overlap
-            boolean seatConflict = InMemoryDataStore.getInstance().bookings.values().stream()
-                    .anyMatch(b -> b.getSeatId() == booking.getSeatId() &&
-                            b.isOverlappingWith(booking.getBookingDate(), booking.getStartTime(), booking.getEndTime()));
+            InMemoryDataStore store = InMemoryDataStore.getInstance();
+            synchronized (store) {
+                // Check in-memory overlap atomically
+                boolean seatConflict = store.bookings.values().stream()
+                        .anyMatch(b -> b.getSeatId() == booking.getSeatId() &&
+                                b.isOverlappingWith(booking.getBookingDate(), booking.getStartTime(), booking.getEndTime()));
 
-            if (seatConflict) {
-                throw new BookingConflictException("The selected seat has already been reserved for this time slot.");
-            }
-
-            boolean userConflict = InMemoryDataStore.getInstance().bookings.values().stream()
-                    .anyMatch(b -> b.getUserId() == booking.getUserId() &&
-                            b.isOverlappingWith(booking.getBookingDate(), booking.getStartTime(), booking.getEndTime()));
-
-            if (userConflict) {
-                throw new BookingConflictException("You already hold an active reservation during this time slot.");
-            }
-
-            booking.setId(InMemoryDataStore.getInstance().nextBookingId());
-
-            Seat s = InMemoryDataStore.getInstance().seats.get(booking.getSeatId());
-            if (s != null) {
-                booking.setSeatNumber(s.getSeatNumber());
-                booking.setZoneName(s.getZoneName());
-            }
-
-            User u = InMemoryDataStore.getInstance().users.get(booking.getUserId());
-            if (u != null) {
-                booking.setStudentName(u.getFullName());
-                if (u instanceof com.library.seatmgmt.model.Student stu) {
-                    booking.setStudentIdNumber(stu.getStudentIdNumber());
+                if (seatConflict) {
+                    throw new BookingConflictException("The selected seat has already been reserved for this time slot.");
                 }
-            }
 
-            InMemoryDataStore.getInstance().bookings.put(booking.getId(), booking);
-            return true;
+                boolean userConflict = store.bookings.values().stream()
+                        .anyMatch(b -> b.getUserId() == booking.getUserId() &&
+                                b.isOverlappingWith(booking.getBookingDate(), booking.getStartTime(), booking.getEndTime()));
+
+                if (userConflict) {
+                    throw new BookingConflictException("You already hold an active reservation during this time slot.");
+                }
+
+                booking.setId(store.nextBookingId());
+
+                Seat s = store.seats.get(booking.getSeatId());
+                if (s != null) {
+                    booking.setSeatNumber(s.getSeatNumber());
+                    booking.setZoneName(s.getZoneName());
+                }
+
+                User u = store.users.get(booking.getUserId());
+                if (u != null) {
+                    booking.setStudentName(u.getFullName());
+                    if (u instanceof com.library.seatmgmt.model.Student stu) {
+                        booking.setStudentIdNumber(stu.getStudentIdNumber());
+                    }
+                }
+
+                store.bookings.put(booking.getId(), booking);
+                return true;
+            }
         }
 
         Connection conn = null;
@@ -429,9 +436,10 @@ public class BookingDAOImpl implements BookingDAO {
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setDate(1, Date.valueOf(cutoffTime.toLocalDate()));
-            ps.setDate(2, Date.valueOf(cutoffTime.toLocalDate()));
-            ps.setTime(3, Time.valueOf(cutoffTime.toLocalTime().minusMinutes(15)));
+            LocalDateTime graceThreshold = cutoffTime.minusMinutes(15);
+            ps.setDate(1, Date.valueOf(graceThreshold.toLocalDate()));
+            ps.setDate(2, Date.valueOf(graceThreshold.toLocalDate()));
+            ps.setTime(3, Time.valueOf(graceThreshold.toLocalTime()));
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {

@@ -8,17 +8,14 @@ import com.library.seatmgmt.exception.InvalidBookingException;
 import com.library.seatmgmt.model.Booking;
 import com.library.seatmgmt.model.User;
 import com.library.seatmgmt.model.enums.BookingStatus;
-import com.library.seatmgmt.model.enums.SeatStatus;
 import com.library.seatmgmt.service.BookingService;
 import com.library.seatmgmt.util.LoggerUtil;
 import com.library.seatmgmt.util.SessionContext;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -95,8 +92,8 @@ public class StudentDashboardController {
             int reserved = bookingDAO.countByStatus(BookingStatus.RESERVED);
             int available = Math.max(0, total - occupied - reserved);
 
-            lblTotalSeats.setText(String.valueOf(total > 0 ? total : 15));
-            lblAvailableSeats.setText(String.valueOf(available > 0 ? available : 12));
+            lblTotalSeats.setText(String.valueOf(total));
+            lblAvailableSeats.setText(String.valueOf(available));
             lblOccupiedSeats.setText(String.valueOf(occupied));
 
             User user = SessionContext.getInstance().getCurrentUser();
@@ -132,8 +129,8 @@ public class StudentDashboardController {
 
     @FXML
     public void handleQuickCheckIn() {
-        if (nextActiveBooking == null) return;
         User user = SessionContext.getInstance().getCurrentUser();
+        if (nextActiveBooking == null || user == null) return;
         try {
             bookingService.checkIn(nextActiveBooking.getId(), user.getId());
             Alert alert = new Alert(Alert.AlertType.INFORMATION, "Checked in successfully! Enjoy your study session.", ButtonType.OK);

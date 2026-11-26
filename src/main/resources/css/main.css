@@ -28,10 +28,6 @@
     -color-occupied-border: #C94A4A;
     -color-occupied-text: #8A2A2A;
 
-    -color-maintenance-bg: #F0F2F1;
-    -color-maintenance-border: #9BA5A0;
-    -color-maintenance-text: #626A66;
-
     -color-selected-bg: #E9F2FE;
     -color-selected-border: #2563EB;
     -color-selected-text: #1E40AF;
@@ -324,16 +320,6 @@
 }
 .seat-occupied .seat-tile-number {
     -fx-text-fill: -color-occupied-text;
-}
-
-.seat-maintenance {
-    -fx-background-color: -color-maintenance-bg;
-    -fx-border-color: -color-maintenance-border;
-    -fx-opacity: 0.65;
-    -fx-cursor: default;
-}
-.seat-maintenance .seat-tile-number {
-    -fx-text-fill: -color-maintenance-text;
 }
 
 .seat-selected {
